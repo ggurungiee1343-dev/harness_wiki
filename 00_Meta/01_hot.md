@@ -17,6 +17,10 @@
 
 ## 📌 현재 진행 중인 작업
 
+### ✅ 완료 — 봇 이중 기동 근본 해결 + /claude_brief 수정 (2026-06-11)
+- `hermes_local.py` — `fcntl.flock` → PID 파일 자동 교체 방식으로 변경. 출장 중 무인 운영 안정화
+- `handlers/_meta.py` — `safe_reply` import 누락으로 `/claude_brief` 미동작 수정
+
 ### ✅ 완료 — P2-④ semantic_index ↔ memory 연동 + _stock.py safe_reply 완전 적용 (2026-06-11)
 - `hybrid_recall()` 3소스 통합: L2 + knowledge_indexer FTS5 + **semantic_index.db FTS5** (신규)
 - `_stock.py` 잔여 28곳 safe wrapper 적용 완료 (전체 핸들러 255개 적용)

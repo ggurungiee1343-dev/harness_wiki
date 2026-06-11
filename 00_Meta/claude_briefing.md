@@ -1,5 +1,5 @@
 # Hermes Claude Briefing
-생성일시: 2026-06-10 21:05
+생성일시: 2026-06-11 19:06
 버전: Hermes v9.2
 
 ---
@@ -14,13 +14,11 @@
 
 블로그 "AI Agent Memory" 4계층 메모리 스택 + 4대 연산 vs 현재 시스템 대비 분석 완료.
 
-**핵심 갭** (🔄 2026-06-11 보정 — Phase 2로 4중 3 해결):
-- ~~Forget 정책 부재~~ ✅ 해결 (`memory_refinement.py`, `/memory forget`)
-- ~~Update 자동 충돌 감지 부재~~ ✅ 해결 (memory_refinement 충돌 감지)
-- ~~Writer 저장 전 self-question 부재~~ ✅ 해결 (저장 판단 로직)
-- semantic_index.db ↔ memory 검색 미연동 — 🔴 잔존 (로드맵 P2-④)
-- 🆕 L3 증류 정지 의심: L2 2,438KB vs L3 4KB — 로드맵 P1-① 참조
-- 상세: [[하네스_업그레이드_로드맵_20260611]]
+**핵심 갭**:
+- Forget 정책 부재 — 메모리 블로트 리스크
+- Update 자동 충돌 감지 부재
+- Writer 저장 전 self-question 부재
+- semantic_index.db ↔ memory 검색 미연동
 
 **참조**: 01_hot.md `📋 AI Agent Memory 개념 분석` 섹션 상세.
 

@@ -1,0 +1,25 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Obsidian
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/cache
+
+# 임시 파일
+*.bak
+*_old.*
+*_test.*
+*.tmp
+
+# 민감 정보 (절대 커밋 금지)
+*.env
+*secret*
+*password*
+*api_key*
+
+# API 키 포함 파일 (GitHub push protection 차단 대상)
+00_Meta/semantic_index.db
+10_AI_Automation/API키 및 텔레그램 토큰 관리 목록.md

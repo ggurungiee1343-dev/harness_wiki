@@ -46,6 +46,9 @@
 |- [[주식 프로그램 및 주식 스크립트와 연동계획]] — 🆕 2026-06-10: V_FINAL 전략 완전 가이드. 텔레그램 7개 명령어 상세 사용법, MCP 서버 사용법, Webull 연동 워크플로우, 개선 루프, 에러 진단 가이드 포함.
 |- [[Phase1_Phase2_개선_설명서]] — 🆕 2026-06-09: Phase 1(낙관적 응답) + Phase 2(세밀한 메모리) 시스템 개선 상세 설명. 구현 구조, 해결 갭 4개, 시너지 효과, 수치 기대 효과 포함. Phase 3 설계 참조 포인터.
 |- [[하네스_업그레이드_로드맵_20260611]] — 🆕 2026-06-11: 메타 7종 전수 분석 기반 갭 진단 9건 + P1~P3 우선순위 로드맵. **L3 증류 정지(54항목 미처리)·Markdown 137곳 미escape 진단 확정.** 나아갈 방향 4대 전략 포함.
+|- [[skill_auditor]] — 🆕 2026-06-11: Runtime Skill Auditor. ~/.hermes/skills/ 전체 동적 감사. 위험 패턴 10종(시스템명령/외부HTTP/동적실행/역직렬화 등) 탐지. 3단계 위험도(CLEAN/REVIEW/SUSPICIOUS). 로그: skill_audit.log.
+|- [[test_layer_harness]] — 🆕 2026-06-11: Layer-Isolated Evaluation Harness. LLM 없이 19개 결정론적 테스트, 1.31초. 4개 레이어(메모리정제/에이전틱루프/파일무결성/핸들러) 독립 검증.
+|- [[HANDOFF]] — 🆕 2026-06-11: Architect Loop 상태 파일. Claude Code(Architect)↔DeepSeek(Builder) 핸드오프. 슬라이스 스펙·빌드 결과·미결 이견·결정 로그 포함. 작업마다 Builder가 업데이트, Architect가 판결.
 |- [[verify_harness_report]] — 🆕 2026-06-09: `/verify_harness` 실행 시마다 자동 갱신. 현재 상태(전체 진단 결과) + 📈 이력 테이블(최근 20회 자동 보존). **시스템 점수 추이를 시간순으로 추적 가능. 구조 개선 전후 비교 기준점.**
 - [[Claude_Code_Hermes_통합_아키텍처]] — 🆕 2026-06-08: Claude Code ↔ Hermes 연결 구조, 시스템 성장 메커니즘 (L1/L2/L3), bio_memory_engine LLM 독립성, Dreaming 버튼 원리, 전체 성장 결론. **"어떤 도구로 작업해도 성장 + Dreaming = 모든 계층 성장"**
 |- `HERMES_HOME 과 환경 변수의 진짜 물리적 지도 (Fact Check) 20260607` — 🆕 2026-06-07: 2-인스턴스 테이블, 포트맵, plist 목록, API Key, config.yaml 전체 구조, WebUI 아키텍처, venv 패치 경로, GGUF n_ctx, 10K 시스템 프롬프트 총정리
@@ -102,3 +105,11 @@
 *추가: 2026-06-06 13:10 — switch_model.sh (모델 전환 스크립트) 참조 추가*
 *추가: 2026-06-05 — AI Agent Memory 개념 분석 참조 항목 추가*
 *작성자: 헤르메스 시스템 아키텍트*
+
+## 신규 문서 — 2026-06-12
+
+| 파일 | 설명 |
+|---|---|
+| `하네스_논문_기반_개선_로그.md` | 논문 11편 기반 하네스 개선 전체 기록 (Why/What/How + 미적용 후속 항목) |
+
+*최종 업데이트: 2026-06-12 — 논문 기반 v9.4 업그레이드 신규 문서 등록*

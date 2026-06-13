@@ -134,6 +134,7 @@ v9.1의 tag/exec/file 보안 + 이중 캐싱 검증 이후, `/reduce` 파이프�
 | 🟢 LOW | Dreaming 3종 버그 수정 | ❌ 미적용 | MemoryEngine import 오류, DummyRouter 우회, 중복 실행 등 Dream engine 안정화 | Phase 3 이전에 선택적 처리 |
 | 🟢 LOW | `/ingest` 재시도 시 중복 방지 | ❌ 미적용 | Inbox에서 온 파일이 중복 분류되지 않도록 `_pending`→`_discarded` 플래그 체계 | Phase 3 이전에 선택적 처리 |
 | 🟢 LOW | AgentMemory 통합 고려 | ❌ 미적용 | 자동 캡처·합성·그래프·Forget 정책 등 GBrain 개선 내용 적용 검토 | v9.4+ 로드맵 |
+| 🟡 MEDIUM | **메모리 중복 content 감지** | ❌ 조건부 대기 | `memory_refinement.py`에 경량 중복 필터 추가 — `_promote_to_l2()` 호출 전 동일 content 해시 비교로 중복 저장 차단. **bio_memory_engine.py 수정 불필요 (Lock Stack 우회).** | 결함 #5/#6 재발 확인 시 즉시 적용. 재발 없으면 불필요. |
 
 #### 🛠️ 최근 장애 복구 요약 (v9.1.5)
 - **장애 현상**: 서브 봇 날씨 API 키 누락, WebUI 단기 기억 오염
@@ -615,6 +616,9 @@ hermes skills tap remove <user/repo> # 제거
 ||||| **2026-06-09** | **AgentForge 4패턴 구현**: Circuit Breaker(`harness_agent.py`), Prompt Injection 방어(ToolResult 샌드박스), Context Compaction(`history_manager.py` 30턴 압축), ToolResult 구조화(`modules/tool_result.py` 신규). "루프 설계" 트렌드(Boris Cherny) 분석 → Hermes Stage 1~4 이미 구현, Stage 5(멀티루프 오케스트레이션) v9.4 후보. | Claude Code |
 ||||| **2026-06-09** | **Phase 1·2 구현 + Phase 3 설계 등록**: Phase 1 낙관적 응답(`optimistic_response.py`), Phase 2 세밀한 메모리(`memory_refinement.py`) 구현 완료. Phase 3 능동적 지능(Proactive Intelligence) v9.4.1 후보로 설계 등록 — 장점·단점·도입 조건 명시. `Phase1_Phase2_개선_설명서.md` 신규 문서. | Claude Code |
 ||||| **2026-06-09** | **Stage 5 Mayor 에이전트 + 루프 가드레일 3종 완료**: `modules/mayor_agent.py` 신규(루프 생애주기 감독, 반복/토큰 예산 추적, 정체 감지, `/orchestrate mayor` 대시보드). `harness_agent.py` 에이전틱 루프에 Mayor 연결 + 토큰 예산(12k/루프) + 루프 종료 시 CoVe 파일시스템 자기검증 자동 실행. | Claude Code |
+||||| **2026-06-11** | **논문 5편 기반 Hermes 강화 (v9.3.2)**: ① Goal-Autopilot — `agentic_loop.py` `_verify_gate()` 추가, 거짓 완료 보고 구조적 차단 (fabrication 33.7%→0.67% 논문 기준). ② Sycophancy Filter — `memory_refinement.py` 아첨 패턴 L2 저장 차단 (25배 증폭 방지). ③ HORMA 계층 검색 — context_tags 클러스터 기반 hybrid_recall() 효율화. ④ Layer-Isolated Harness — `tests/test_layer_harness.py` 신규, 19개 테스트 1.31초. ⑤ Runtime Skill Audit — `modules/skill_auditor.py` 신규, 10종 위험 패턴. | Claude Code |
+||||| **2026-06-11** | **Architect Loop 워크플로우 도입**: `HANDOFF.md` 신규 생성. Claude Code(Architect)↔DeepSeek WebUI(Builder) 역할 분리. 슬라이스 스펙·수락기준·범위 밖·빌드 결과·이견·결정 로그 구조화. `harness_agent.py` + `CLAUDE.md` 응답 품질 원칙 4개 추가. `자동화_시스템_사용법.md` §13 신규. | Claude Code |
+||||| **2026-06-11** | **메모리 중복 감지 개선점 등록 (조건부)**: `memory_refinement.py`에 content 해시 기반 중복 필터 추가 설계 등록. `_promote_to_l2()` 타임스탬프·중요도·연상망은 이미 정상 구현 확인됨. **적용 조건: 결함 #5/#6 재발 시에만 투입** — 현재 over-engineering 판단으로 대기. L4 knowledge.db·Agent Orchestrator는 1인 운영 Hermes 규모에 불필요 결론. | Claude Code |
 
 ---
 

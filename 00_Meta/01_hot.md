@@ -17,6 +17,19 @@
 
 ## 📌 현재 진행 중인 작업
 
+### ✅ 완료 — 논문 5편 기반 Hermes 강화 v9.3.2 (2026-06-11)
+- **Goal-Autopilot** `agentic_loop.py` — `_verify_gate()` 추가, RUN_CMD/CREATE 거짓 완료 보고 구조적 차단
+- **Sycophancy Filter** `memory_refinement.py` — 아첨 패턴(80자 미만 동의) L2 저장 차단
+- **HORMA 계층 검색** `memory_refinement.py` — context_tags 클러스터 기반 hybrid_recall() 효율화
+- **Layer-Isolated Harness** `tests/test_layer_harness.py` 신규 — 19개 결정론적 테스트, 1.31초
+- **Runtime Skill Audit** `modules/skill_auditor.py` 신규 — 10종 위험 패턴, 3단계 분류
+
+### ✅ 완료 — Architect Loop 워크플로우 도입 (2026-06-11)
+- `wiki/00_Meta/HANDOFF.md` 신규 생성 — Architect↔Builder 상태 공유 파일
+- `harness_agent.py` + `CLAUDE.md` 응답 품질 원칙 4개 추가 (핵심 먼저·증거 기반·질문 시 분석만·재논의 금지)
+- `자동화_시스템_사용법.md` §13 Architect Loop 섹션 신규
+- 역할: Claude Code(Architect) + DeepSeek WebUI(Builder) + Gemini(Reviewer) + Perplexity(Research)
+
 ### ✅ 완료 — 봇 이중 기동 근본 해결 + /claude_brief 수정 (2026-06-11)
 - `hermes_local.py` — `fcntl.flock` → PID 파일 자동 교체 방식으로 변경. 출장 중 무인 운영 안정화
 - `handlers/_meta.py` — `safe_reply` import 누락으로 `/claude_brief` 미동작 수정
@@ -546,9 +559,28 @@ gemma4 launchctl unload ~/Library/LaunchAgents/com.bluesea.llama_server2.plist
 ### 📑 마스터 플랜 (추후 작업)
 - L1 단기 기억 파일 격리를 위해 `HERMES_HOME` 활용 또는 `harness_memory_webui.json`/`harness_memory_telegram.json` 도입
 - `bio_memory_engine.py`와 `deriver_layer.py` 잠금 해제 필요 시 최소 패치 설계
-- 테스트 스위트(`tests/test_memory_engine.py`) 추가 및 CI 연동
+- ~~테스트 스위트 추가~~ → ✅ 2026-06-11 완료: `tests/test_bio_memory.py` 6→19개 확장 + 운영 기억 오염 차단(`_make_engine` 격리). CI 연동은 추후
+- ✅ 2026-06-11: 비대화 감시 `check_file_sizes.sh` + `com.hermes.sizewatch` (매주 월 09:00) 가동
 - 상세 내용은 `@wiki/00_Meta/HERMES3_MASTER_DEVELOPMENT_GUIDE.md`에 기록 예정
 - **NVIDIA NIM 70B 모델명 수정**: `harness_agent.py` 내 `openai/gpt-oss-120b` → `meta/llama3-70b-instruct` 로 수정하여 폴백 오류 해결.
 - **실시간 날씨 인터셉터**: `web_agent_module.py`에 네이버 날씨 웹 스크래퍼를 추가하여 DeepSeek/DuckDuckGo 검색 시 동네 날씨(예: 명륜동)가 표출되지 않던 한계 극복.
 - **텔레그램 대기 UX 개선**: 무거운 LLM API 호출 시 '🤔 생각 중...'이 멈춰있지 않고 움직이는 비동기 애니메이션 태스크를 `harness_agent.py`에 적용.
 - **파일 절단 사고 복구**: 이전 에이전트가 `view_file` 800줄 제한을 모른 채 코드를 작성해 파일이 망가졌던 것을 구조 분석을 통해 완벽히 복구함.
+
+### ✅ 완료 — 논문 기반 하네스 대규모 업그레이드 v9.4 (2026-06-12)
+
+**분석 논문**: 11편 (Model Collapse, SAGE, Code as Harness, ClawTrojan, COLLEAGUE.SKILL, TraceGraph, AdaCoM, MIT Self-Revising, Aging Agents, Bi-Temporal Memory, OpenAI Engineering)
+
+**적용 완료**:
+- `bio_memory_engine.py` — Model Collapse 방어 (assistant 점수 상한), 임베딩 인라인 제거 (2.3MB→~150KB), eviction while 수정, source 태깅
+- `memory_refinement.py` — SAGE 신선도 게이트 4개 함수 (novelty_score, is_novel_enough, diversity_check, get_diversity_report)
+- `context_assembler.py` — ClawTrojan 방어 (_sanitize_wiki_content, 7개 regex 패턴)
+- `skill_auditor.py` — SkillLifecycle 클래스 (lifecycle DB, stale 탐지, 보고서)
+- `agentic_loop.py` — TraceGraph 궤적 로깅 (_trace, trace_log.jsonl 롤링 200엔트리)
+
+**미적용 후속**:
+- AdaCoM context hot/cold 분리 (context_assembler 리팩 필요)
+- Governed Harness Mutation (skill_evolver.py 분석 필요)
+- Deep Telemetry 파이프라인
+
+**상세 기록**: `wiki/00_Meta/하네스_논문_기반_개선_로그.md`

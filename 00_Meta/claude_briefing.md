@@ -1,5 +1,5 @@
 # Hermes Claude Briefing
-생성일시: 2026-06-11 19:06
+생성일시: 2026-06-13 19:11
 버전: Hermes v9.2
 
 ---
@@ -10,31 +10,31 @@
 - **01_hot.md** — 세션 시작 시 자동 스캔
 
 ## 🖥️ 현재 시스템 상태
-**상태**: 🔵 문제 인식 저장 (향후 수정 로드맵 확정 시 반영 예정)
+- **Model Collapse 차단**: LLM 응답이 L2 장기기억으로 올라가는 경로 완전 차단
+- **ClawTrojan 방어**: wiki 파일 오염 통한 하네스 탈취 시도 탐지·차단
+- **스킬 노화 감지**: 30일 미사용·성공률 저조 스킬 자동 stale 마킹
+- **도구 실행 궤적 기록**: `~/.hermes/runtime/trace_log.jsonl`
 
-블로그 "AI Agent Memory" 4계층 메모리 스택 + 4대 연산 vs 현재 시스템 대비 분석 완료.
+### 미적용 후속 항목
+- AdaCoM context hot/cold 분리 (context_assembler 리팩토링 필요)
+- Governed Harness Mutation (skill_evolver.py 분석 후)
+- Deep Telemetry 파이프라인 확장
 
-**핵심 갭**:
-- Forget 정책 부재 — 메모리 블로트 리스크
-- Update 자동 충돌 감지 부재
-- Writer 저장 전 self-question 부재
-- semantic_index.db ↔ memory 검색 미연동
+*최종 업데이트: 2026-06-12 — 논문 기반 하네스 대규모 업그레이드*
 
-**참조**: 01_hot.md `📋 AI Agent Memory 개념 분석` 섹션 상세.
+---
 
-*최종 업데이트: 2026-06-07 11:52 — cove_engine.py 이전, 메타 7종 갱신*
+## 📋 2026-06-12 협업 규칙 7개 → 하네스 코드 적용
 
-|*최종 업데이트: 2026-06-07 11:52 — cove_engine.py 이전, 메타 7종 갱신*
-|- **스크립트**: `~/Applications/venu/scripts/switch_model.sh` → `/usr/local/bin/switch-model` 심링크
-|- **용도**: Hermes Agent 메인 모델 전환 (got-oss-120b / DeepSeek Chat)
-||- **사용법**: `switch-model got` (GPT-OSS-120B NVIDIA) / `switch-model deepseek` (DeepSeek Chat)
+| 파일 | 변경 내용 | 규칙 |
+|---|---|---|
+| `modules/history_manager.py` | `get_context_pressure()` 추가 — 포화도 {turns, ratio, warn, critical} 반환 | 규칙 5 |
+| `modules/response_handler.py` | 응답 말미 컨텍스트 포화도 경고 삽입 (75%+/100%+) | 규칙 5 |
+| `modules/skill_auditor.py` | `SkillLifecycle.record_feedback()` 추가 — MJ 정정 신호로 성공률 소급 보정 | 규칙 6 |
+| `handlers/_base.py` | `_detect_correction()` + `emit_skill_feedback()` — 정정 패턴 자동 감지 훅 | 규칙 6 |
+| `modules/context_assembler.py` | `_input_clarity_score()` + Input Clarity Gate — 모호 입력 시 LLM에 힌트 주입 | 규칙 7 |
 
-||- **새로운 업데이트**: `~/.hermes/config.yaml`와 `~/Applications/venu/.hermes2/config.yaml`에 전체 toolsets를 포함하도록 2026-06-06에 적용되었습니다. 이제 두 Hermes 인스턴스 모두 모든 도구를 사용할 수 있습니다.
-|- **적용 대상**: ~/.hermes/config.yaml (WebUI+Gateway) + venu/.hermes2/config.yaml (Telegram Bot)
-|- **특징**: 설정 삭제 없이 `# [SWITCHED to ...]` 주석 보존, 전환 후 `hermes gateway restart` 필요
-|- **배경**: DeepSeek API 대신 NVIDIA 무료 GPT-OSS-120B 메인 사용. Qwen2.5-14B-Instruct(로컬)는 별도 API 영향 없음.
-- **상태**: NVIDIA 70B 모드 및 DeepSeek 날씨 검색 기능 모두 안정화됨.
-- **주요 변경점**: `harness_agent.py`의 비동기 애니메이션 적용 및 모델명 수정, `web_agent_module.py` 네이버 날씨 스크래퍼 통합.
+*최종 업데이트: 2026-06-12 — 협업 규칙 기반 구조적 개선 3종*
 
 ## 🚨 미해결 버그/장애
 ## 🔴 결함 #1: Zombie Poller (PTB run_polling 블로킹)

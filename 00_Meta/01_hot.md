@@ -17,6 +17,26 @@
 
 ## 📌 현재 진행 중인 작업
 
+### ✅ 완료 — 텔레그램 봇 장애 전체 해결 (2026-06-17)
+- ISP 차단은 공유기 재부팅으로 해결됨
+- 워치독 오탐(메시지 없는 조용한 상태를 행으로 오판) 수정: 하트비트 파일 기반으로 전환, 텔레그램 알람 제거
+- `hermes_local.py` 폴링 루프에 `_HEARTBEAT.touch()` 추가 (15초 주기, `~/.hermes/runtime/bot_heartbeat`)
+- `check_bot_alive.sh` 최종: 하트비트 mtime 3분 정지 기준, 내부 동작만(알람 없음), SIGTERM 우선
+
+### 🚨 미해결 — 텔레그램 SNI 차단으로 Hermes1 무응답 (2026-06-17)
+- **진짜 원인**: 코드/프로세스 문제 아님. **ISP가 api.telegram.org에 대한 TLS SNI 차단** 중 — 일반 인터넷(Google 등)은 정상, 텔레그램 IP 일부는 TCP는 열려도 TLS 핸드셰이크에서 멈춤(`curl` `000`). 그동안의 "행"·"크래시 루프"·"Conflict" 증상은 전부 이 네트워크 차단으로 인한 재연결 시도의 부작용이었음
+- **확인 방법**: `curl --max-time 6 https://api.telegram.org` → `000` 이면 차단 상태. `curl https://www.google.com`은 정상(`200`) — 도메인 특정 차단 확인 포인트
+- **현재 이 Mac에 활성 VPN 없음**
+- **해결책**: VPN 연결 또는 다른 네트워크(핫스팟) 전환, 혹은 ISP 차단이 풀릴 때까지 대기. 봇 프로세스 자체는 정상 대기 상태이므로 네트워크만 풀리면 자동 복구됨
+- **부수 효과**: 디버깅 중 `hermes_local.py`의 `except Exception: pass`(폴링 종료 시 원인 완전 삼킴)를 발견 → `logger.error(f"[Polling 종료 원인] ...")`로 수정해 향후 같은 문제 빠르게 진단 가능해짐
+
+### ✅ 완료 — Hermes1 행(hang) 워치독 도입 + 크래시 루프 추가 수정 (2026-06-17)
+- **1차 장애**: 텔레그램 API 네트워크 오류(`httpx.ReadError`) 폭주 후 폴링 루프가 죽지도 않고 멈춤(행) → launchd `KeepAlive`는 프로세스 종료시만 재시작하므로 무인 감지 안 됨 (3시간 30분간 무응답)
+- **1차 조치**: `check_bot_alive.sh` 신규 — 로그 mtime 10분 이상 정지 시 강제 재시작 + 텔레그램 알림. `com.hermes.botwatch` LaunchAgent로 5분마다 자동 실행
+- **2차 장애 (워치독의 부작용)**: 워치독이 `kill -9`로 죽이자 텔레그램 서버측 getUpdates long-poll 연결이 즉시 안 끊김 → 5초 만에 뜬 새 인스턴스가 `telegram.error.Conflict: terminated by other getUpdates request`로 즉시 충돌·종료 → `ThrottleInterval=5` 재시작 → 또 충돌, 무한 크래시 루프 (실제 발생, MJ 신고로 발견)
+- **2차 조치**: `launchctl unload` → `pkill`로 완전 정지 후 60초 대기(서버측 연결 만료) → `launchctl load`로 1회 정상 기동 확인(Conflict 재발 없음). `check_bot_alive.sh`를 SIGTERM 우선(최대 5초 대기) → 그래도 살아있으면 SIGKILL 방식으로 수정, kickstart 전 대기를 2초→5초로 늘림
+- **잔여 검토**: `hermes_local.py` 폴링 루프에 httpx 타임아웃 명시 + 하트비트 파일 기록 (근본 원인 완화, 코드 수정 필요해 보류 중)
+
 ### ✅ 완료 — 논문 5편 기반 Hermes 강화 v9.3.2 (2026-06-11)
 - **Goal-Autopilot** `agentic_loop.py` — `_verify_gate()` 추가, RUN_CMD/CREATE 거짓 완료 보고 구조적 차단
 - **Sycophancy Filter** `memory_refinement.py` — 아첨 패턴(80자 미만 동의) L2 저장 차단

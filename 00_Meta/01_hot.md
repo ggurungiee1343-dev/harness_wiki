@@ -604,3 +604,20 @@ gemma4 launchctl unload ~/Library/LaunchAgents/com.bluesea.llama_server2.plist
 - Deep Telemetry 파이프라인
 
 **상세 기록**: `wiki/00_Meta/하네스_논문_기반_개선_로그.md`
+
+---
+
+### ✅ 완료 — MJstock 실험 필터 토글 시스템 v1.0 (2026-06-18)
+
+**프로젝트**: `/Users/bluesea/Applications/Mjstock`
+
+**완료 항목**:
+- `screener/run_scan.py` — 실험 필터 토글 3개 (`EXP_USE_FRESH_TREND`, `EXP_USE_IS_LEADER`, `EXP_USE_IS_TIGHT`) + `compute_exp_filters()` 함수 신설. US/KR 스캔 양쪽 적용. CSV에 exp_* 컬럼 상시 기록
+- `screener/signal_tracker.py` — `_calc_position_size()` ATR 기반 포지션 사이징 추가. `record_scan()` 파라미터 확장 (atr14, suggested_shares, exp_* 3종)
+- `app.py` — exp_* 컬럼 감지 시 실험 필터 체크박스 자동 표시. 재스캔 없이 즉시 필터링 + 필터된 종목 수 캡션
+- `screener/screen_uryangju_nongsaju.py` — 중복 실험 필터 코드 제거
+- `docs/` 4개 문서 업데이트 (signals_entry_points, quant_logic_analysis, korean_original_formulas, MJstock_사용설명서)
+
+**다음 작업 후보**:
+- `EXP_USE_*` 토글을 app.py UI에서 직접 제어하는 설정 패널 추가
+- `suggested_shares` 컬럼을 차트 탭에 표시

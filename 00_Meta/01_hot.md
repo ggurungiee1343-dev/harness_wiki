@@ -17,6 +17,33 @@
 
 ## 📌 현재 진행 중인 작업
 
+### ✅ 완료 — MJstock 유니버스 확장 + 티커 검색 + UI 개편 (2026-06-18)
+- **유니버스 전면 확장**: 나스닥1000 / 코스피946 / 코스닥1000 실 데이터 CSV 생성 (FinanceDataReader + NASDAQ FTP)
+  - `data/nasdaq1000.csv` — 나스닥 상장 시총 상위 1000종목
+  - `data/kospi_full.csv` — 코스피 전체 946종목 (시총 정렬)
+  - `data/kosdaq_full.csv` — 코스닥 전체 시총 상위 1000종목
+  - `data/dow30.csv`, `data/russell1000.csv` — 기존 유지
+- **슬라이더 0~1000 통일**: 0=전체, 오른쪽으로 밀면 상위 N개 (소형주 제외용)
+- **유니버스별 자체 1000개**: 보완 로직 제거, 각 CSV가 독립적으로 최대 1000개 보유
+- **스캐너 탭 UI**: 미국/한국 선택 → 유니버스 버튼(4개/2개) → 슬라이더 → 검색식 카드형 박스
+- **차트 탭 티커 직접 검색**: 티커/종목코드 입력 → `--single-chart` 모드로 차트 즉시 생성
+- **FRESH_TREND 버그 수정**: KIS API 100봉 제한 대응 — EMA200 조건 불가 시 EMA50 기울기로 fallback
+- **공중★ 하락 해석**: `signals_entry_points.html` GONGJOONG 설명에 "급등 말미 = 에너지 소진 경고" 추가
+- **`data_loader.py`**: `get_us_universe_tickers()`, `get_kr_universe_tickers()` 신규 함수 추가
+- **`run_scan.py`**: `--universe`, `--top-n`, `--single-chart` 파라미터 추가
+
+### ✅ 완료 — MJstock UI 개선 + 실험 필터 시스템 (2026-06-18)
+- **스캐너 탭 중복 제거**: 스캔 결과 차트 버튼 그리드 제거 → 통과 종목 수 안내 + "차트 보기 탭으로 이동" 메시지로 교체
+- **차트 탭 점수 정렬**: `run_scan.py`에서 farming signals + `compute_score()` 직접 계산 → CSV `score` 컬럼 → 차트탭 내림차순 정렬 + 버튼에 "N점" 표시
+- **실험 필터 토글**: `compute_exp_filters()` 함수 신설 (run_scan.py) — FRESH_TREND/IS_LEADER/IS_TIGHT 3종, US+KR 12개 검색식 통합 적용
+- **Best Signal 문구**: `*(수동 설정값 — 스캔 데이터 30일 누적 후 실제 승률로 자동 변경됩니다)*` 추가
+- **문서 업데이트**: `MJstock_사용설명서.html` (Step 5/6, 탭 설명), `quant_logic_analysis.html` (§9 실험 필터), `signals_entry_points.html` (§9 보조지표 독법, §10 과거이력), `korean_original_formulas.html` (SEPA/GROK 아카이브)
+
+### ✅ 완료 — 메타인지 Faithful Uncertainty 룰 적용 (2026-06-18)
+- `harness_agent.py` `_FIXED_SYS_PROMPT` Rule 12 신설: `[확실]`/`[추론]`/`[불확실]` 3단계 접두어, 사실·정보 질문에만 적용
+- 기대 효과: 불필요한 [SEARCH] 감소 + 환각(확신에 찬 오류) 감소
+- 출처: Google 논문 "Hallucinations Undermine Trust; Metacognition is a Way Forward"
+
 ### ✅ 완료 — 텔레그램 봇 장애 전체 해결 (2026-06-17)
 - ISP 차단은 공유기 재부팅으로 해결됨
 - 워치독 오탐(메시지 없는 조용한 상태를 행으로 오판) 수정: 하트비트 파일 기반으로 전환, 텔레그램 알람 제거

@@ -17,6 +17,12 @@
 
 ## 📌 현재 진행 중인 작업
 
+### ✅ 완료 — MJstock /mjstock 텔레그램 온디맨드 분석 (2026-06-18)
+- **`scan_single.py` 신규**: 단일 종목 × 검색식 → 점수 계산 + 차트 즉시 생성 (시간 제한 없음)
+- **`_stock.py` `cmd_mjstock` / `callback_mjstock` 추가**: 인라인 버튼으로 검색식 선택 → 결과+차트URL 회신
+- **`_callbacks.py`**: `mjstock:` 콜백 라우팅 추가
+- **`hermes_local.py`**: `/mjstock` CommandHandler 등록
+
 ### ✅ 완료 — MJstock 헬스체크 + 설정 탭 + 사용설명서 (2026-06-18)
 - **`health_check.py` 신규**: 평일 18:00 crontab 자동 실행. 스캔 실행 여부/로그 에러/수익률 채움/퀀트 누적 현황 체크 → 텔레그램 일일 리포트
 - **`app.py` 설정 탭(tabs[5]) 신규**: 텔레그램 봇 토큰/채팅 ID 입력·저장, 채팅 ID 자동 조회, 테스트 발송, 연동 상태 요약 — 가족 배포용 자기 계정 알림 설정

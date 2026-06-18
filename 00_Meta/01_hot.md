@@ -648,3 +648,28 @@ gemma4 launchctl unload ~/Library/LaunchAgents/com.bluesea.llama_server2.plist
 **다음 작업 후보**:
 - `EXP_USE_*` 토글을 app.py UI에서 직접 제어하는 설정 패널 추가
 - `suggested_shares` 컬럼을 차트 탭에 표시
+
+---
+
+### ✅ 완료 — MJstock 퀀트 DB 기초공사 + 자동 축적 시스템 (2026-06-18)
+
+**프로젝트**: `/Users/bluesea/Applications/Mjstock`
+
+**완료 항목**:
+- `screener/run_scan.py` — `compute_quant_snapshot()` 신설. 스캔 통과 종목마다 17개 퀀트 컬럼(진입가·ATR·RSI·MACD·BB·EMA이격도·52주고가·거래량비율·미래수익률 자리) 자동 저장. US/KR 공통 적용
+- `screener/batch_fill_returns.py` — 신규. 매일 17:30 cron 자동 실행. ret_5d/10d/20d 자동 채움 + `health_check()` 함수로 적재 상태 반환. `results/fill_returns.log` 기록
+- `app.py` 탭4 — "최근 결과" → "퀀트 로그" 전면 개편. 검색식별 서브탭 + 요약 지표 + 6종 차트(점수/RSI/거래량비율/EMA이격도/MACD/52주고가) 체크박스 토글 + "데이터 적재 상태 확인" 헬스체크 섹션 + CSV 다운로드
+- crontab — 매주 월~금 17:30 `batch_fill_returns.py` 자동 실행 등록 완료
+- 유니버스 버튼 레이블 간소화, 슬라이더 눈금, CSV 업데이트 섹션 추가
+- score 계산 수정 (항상 0 → bool 조건 컬럼 기반), 차트 탭 순위 번호 추가
+
+**퀀트 DB 이력관리 방향 (확정)**:
+- 스캔마다 → `scan_*.csv`에 17개 퀀트 스냅샷 자동 저장
+- 매일 17:30 → `batch_fill_returns.py`가 ret_5d/10d/20d 자동 채움
+- 퀀트 로그 탭 헬스체크로 적재 누락 즉시 감지
+- 데이터 수천 건 쌓이면 → 논문/전략 시뮬레이션으로 진입타이밍 최적화 가능
+
+**다음 작업 후보**:
+- `batch_fill_returns.py` 실제 KIS API 연동 테스트 (스캔 5일 후)
+- 퀀트 로그 탭에 수익률 분포 차트 추가 (ret_5d/10d/20d 히스토그램)
+- 논문 기반 새 지표 시뮬레이션 — MJ가 논문 던져주면 Claude가 백테스트

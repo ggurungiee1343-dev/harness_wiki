@@ -17,6 +17,10 @@
 
 ## 📌 현재 진행 중인 작업
 
+### ✅ 완료 — MJstock 더블 발송 버그 수정 + 모바일 대시보드 (2026-06-18)
+- **더블 발송 버그 수정**: `auto_scan_nasdaq500.py`가 `run_scan.py` × 8 호출 → 각각 텔레그램 발송 = 8+1건 → `--no-telegram` 플래그로 차단, 요약 1건만 발송
+- **`mobile_dashboard.py` 신규**: Python 내장 http.server, 포트 8765, 같은 WiFi 폰 접속, 검색식 카드 + 종목 점수바 + 5분 자동 새로고침
+
 ### ✅ 완료 — MJstock 유니버스 확장 + 티커 검색 + UI 개편 (2026-06-18)
 - **유니버스 전면 확장**: 나스닥1000 / 코스피946 / 코스닥1000 실 데이터 CSV 생성 (FinanceDataReader + NASDAQ FTP)
   - `data/nasdaq1000.csv` — 나스닥 상장 시총 상위 1000종목

@@ -1,5 +1,5 @@
 # Hermes Claude Briefing
-생성일시: 2026-06-13 19:11
+생성일시: 2026-06-19 21:32
 버전: Hermes v9.2
 
 ---
@@ -10,31 +10,31 @@
 - **01_hot.md** — 세션 시작 시 자동 스캔
 
 ## 🖥️ 현재 시스템 상태
-- **Model Collapse 차단**: LLM 응답이 L2 장기기억으로 올라가는 경로 완전 차단
-- **ClawTrojan 방어**: wiki 파일 오염 통한 하네스 탈취 시도 탐지·차단
-- **스킬 노화 감지**: 30일 미사용·성공률 저조 스킬 자동 stale 마킹
-- **도구 실행 궤적 기록**: `~/.hermes/runtime/trace_log.jsonl`
+#### 변경 내용
 
-### 미적용 후속 항목
-- AdaCoM context hot/cold 분리 (context_assembler 리팩토링 필요)
-- Governed Harness Mutation (skill_evolver.py 분석 후)
-- Deep Telemetry 파이프라인 확장
+| 파일 | 변경 내용 |
+|---|---|
+| `app.py` | SCREENERS_KR dict 키 6개 `kr_X` → `X_kr` 형식으로 통일 (치명적) |
+| `run_scan.py` | `run_one()` 함수에 `no_telegram: bool = False` 파라미터 추가, `args.no_telegram` NameError 수정 (치명적) |
+| crontab | 07:30/17:30/18:00 작업 3개 `/usr/bin/python3` → `.venv/bin/python` 교체 (치명적) |
+| `auto_scan_nasdaq500.py` | `sys.executable` → `PYTHON` 변수 (venv 우선, 없으면 sys.executable fallback) |
+| `app.py:617` | `st.switch_tab("📊 차트 보기")` 제거 → 안내 메시지로 대체 (Streamlit 1.58 미지원) |
+| `send_scan_result.py:52` | `load_latest_csv` 반환 타입 `pd.DataFrame | None` → `tuple | None` |
 
-*최종 업데이트: 2026-06-12 — 논문 기반 하네스 대규모 업그레이드*
+#### 버그 요약
 
----
+| 번호 | 심각도 | 파일 | 증상 |
+|---|---|---|---|
+| BUG-1 | 치명적 | `app.py` | KR 검색식 키 불일치 → KR 스캔 argparse 검증 실패, 결과 폴더 미존재 경로 참조 |
+| BUG-2 | 치명적 | `run_scan.py` | `run_one()`에서 `args` NameError — `args.no_telegram` 미전달 |
+| BUG-3 | 치명적 | crontab | venv 미사용 → pandas/dotenv/requests/plotly import 실패 |
+| BUG-4 | 경미 | `app.py` | `st.switch_tab` Streamlit 1.58 미지원 API 호출 오류 |
+| BUG-5 | 경미 | `send_scan_result.py` | 반환 타입힌트 오류 (`DataFrame` → `tuple`) |
 
-## 📋 2026-06-12 협업 규칙 7개 → 하네스 코드 적용
-
-| 파일 | 변경 내용 | 규칙 |
-|---|---|---|
-| `modules/history_manager.py` | `get_context_pressure()` 추가 — 포화도 {turns, ratio, warn, critical} 반환 | 규칙 5 |
-| `modules/response_handler.py` | 응답 말미 컨텍스트 포화도 경고 삽입 (75%+/100%+) | 규칙 5 |
-| `modules/skill_auditor.py` | `SkillLifecycle.record_feedback()` 추가 — MJ 정정 신호로 성공률 소급 보정 | 규칙 6 |
-| `handlers/_base.py` | `_detect_correction()` + `emit_skill_feedback()` — 정정 패턴 자동 감지 훅 | 규칙 6 |
-| `modules/context_assembler.py` | `_input_clarity_score()` + Input Clarity Gate — 모호 입력 시 LLM에 힌트 주입 | 규칙 7 |
-
-*최종 업데이트: 2026-06-12 — 협업 규칙 기반 구조적 개선 3종*
+**에러 진단 포인트**:
+- KR 스캔 argparse error → SCREENERS_KR 키 형식 확인 (`X_kr` 패턴)
+- `run_one()` NameError → 호출부 3곳에 `no_telegram=args.no_telegram` 전달 여부 확인
+- crontab 스캔 실패 시 `which python` → `.venv/bin/python` 확인
 
 ## 🚨 미해결 버그/장애
 ## 🔴 결함 #1: Zombie Poller (PTB run_polling 블로킹)

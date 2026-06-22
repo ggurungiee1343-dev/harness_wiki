@@ -17,6 +17,12 @@
 
 ## 📌 현재 진행 중인 작업
 
+### ✅ 완료 — MJstock 검색기 개선 v2 (2026-06-23)
+- **ticker_analyze.py**: 분석 결과 텔레그램 메시지 하단에 Claude 인지편향 체크 프롬프트 템플릿 자동 첨부 ("위 종목 {ticker} 점수 {score}점 나왔는데 인지편향 체크리스트랑 청산 조건 잡아줘")
+- **screen_selyeok_pochak.py BUG FIX**: `c_ema` 조건 역방향(EMA_9 > EMA_5) → 정방향(EMA_5 > EMA_9) 수정. 이 버그로 하락 배열 종목이 통과되고 상승 배열이 필터링되던 문제 해결
+- **screen_uryangju_nongsaju.py 강화**: EMA45 추가, 30분봉 Ichimoku 구름대 추가, K 조건 EMA 기준 오류 수정(EMA_200→EMA_45), J 조건(30분봉 구름대 위) 신규 추가
+- **nongsa_danta_guide.html / nongsa_signal_board.html**: v2.0 업데이트 (이전 세션)
+
 ### ✅ 완료 — MJstock /mjstock 텔레그램 온디맨드 분석 (2026-06-18)
 - **`scan_single.py` 신규**: 단일 종목 × 검색식 → 점수 계산 + 차트 즉시 생성 (시간 제한 없음)
 - **`_stock.py` `cmd_mjstock` / `callback_mjstock` 추가**: 인라인 버튼으로 검색식 선택 → 결과+차트URL 회신
@@ -688,3 +694,59 @@ gemma4 launchctl unload ~/Library/LaunchAgents/com.bluesea.llama_server2.plist
 - `batch_fill_returns.py` 실제 KIS API 연동 테스트 (스캔 5일 후)
 - 퀀트 로그 탭에 수익률 분포 차트 추가 (ret_5d/10d/20d 히스토그램)
 - 논문 기반 새 지표 시뮬레이션 — MJ가 논문 던져주면 Claude가 백테스트
+
+---
+
+### ✅ 완료 — MJstock 스캔 시스템 개편 v2.0 (2026-06-23)
+
+**프로젝트**: `/Users/bluesea/Applications/Mjstock`
+
+**완료 항목**:
+- `auto_scan_morning.py` — 신규. 아침 일봉 스캔 전용 (KST 07:00). 미국 5종 + 한국 5종 (uryangju/judoju/danta/selyeok/chowuryang) 실행
+- `auto_scan_intraday.py` — 신규. 장중 스캔 전용. `--market us` (KST 22:30) / `--market kr` (KST 09:10). pochak/shooting/chuddoli 3종
+- `screener/send_scan_result.py` — 수정. 텔레그램 로컬 IP 링크 → HTML 파일 직접 sendDocument 전송. `get_chart_paths()` 신규. 폰 LTE에서 바로 탭하여 열림
+- `auto_scan_nasdaq500.py` — `.bak`으로 백업 (더 이상 사용 안 함)
+- crontab — 기존 `0 7 auto_scan_nasdaq500.py` 제거. 신규 3개 등록:
+  - `0 7 * * 1-5` auto_scan_morning.py → logs/scan_morning.log
+  - `30 22 * * 1-5` auto_scan_intraday.py --market us → logs/scan_intraday_us.log
+  - `10 9 * * 1-5` auto_scan_intraday.py --market kr → logs/scan_intraday_kr.log
+- `docs/` 5개 HTML 교체 (Jun 18 → Jun 21 버전): MJstock_사용설명서, signals_entry_points, quant_logic_analysis, korean_original_formulas, kr_to_us_conversion
+
+**해결된 문제**:
+- 텔레그램 차트 링크 폰에서 안 열림 (LTE/5G 환경 차단) → HTML 직접 첨부로 해결
+- 장중 전용 검색기(pochak/shooting/chuddoli)를 아침에 실행하던 오류 → 시간대 분리
+- 장 4시간 전에 스캔하던 cron 타이밍 오류 → 올바른 시간대로 수정
+
+**미해결 후속과제**:
+- `run_scan.py --reuse-cache` 옵션 추가 (일봉 중복 다운로드 근본 해결)
+- `health_check.py` `.env` 경로 수정 (`screener/screener/.env` → `screener/.env`)
+- 서머타임 자동 감지 (미국 장중 22:30 vs 23:30)
+
+---
+
+### ✅ 완료 — Hermes 메모리 레이어 개선 + MJstock 티커 분析기 (2026-06-23)
+
+**프로젝트**: Hermes + `/Users/bluesea/Applications/Mjstock`
+
+**완료 항목**:
+- `modules/memory_schema.py` — 신규. L2 EpisodicEntry 데이터클래스 (is_worth_storing/is_expired/retention_score), L3 SemanticMemory (카테고리 dict 구조), CATEGORY_KEYWORDS 자동 분류 테이블
+- `modules/memory_consolidator_v2.py` — 신규. L2→L3 증류 파이프라인. Dreaming 폐기 후 고아된 경로 복구. 실측 경로(`~/.hermes/memory/`) 기반. `--dry-run` / `--health` 플래그 지원
+- `modules/context_assembler_v2.py` — 신규. 기존 7블록 → 키워드 감지 시 3~7블록 (Rule of Simplicity). history 15턴 → 10턴. ms 측정 로그 추가
+- `screener/ticker_analyze.py` — 신규. `/mjstock AAPL` 명령어 개선판. KIS API 1회 다운로드 → 모든 검색기 동시 적용 → 점수 순위표 + 1등 시그널 텔레그램 전송. `include_intraday=True` 옵션으로 5분봉 장중 검색기 포함
+- crontab — 매일 04:00 `memory_consolidator_v2` 자동 실행 등록
+
+**해결된 문제**:
+- L2→L3 증류 경로 끊김 (Dreaming 폐기 후 고아 상태) → memory_consolidator_v2로 복구
+- L3 패턴 카테고리 없이 무작위 누적 → SemanticMemory 카테고리 dict 구조로 개선
+- context_assembler 7블록 항상 전부 조립 → 키워드 감지 시 선택적 조립으로 경량화
+- /mjstock 단일 검색식만 → 전체 검색기 동시 비교 + 점수 순위표
+
+**추가 완료 (2026-06-23)**:
+- `harness_agent.py:255` — `context_assembler` → `context_assembler_v2` 전환 완료
+- `screener/screen_nongsa_danta_kr.py` — 신규 설치 (농사단타 한국)
+- `screener/screen_nongsa_danta_us.py` — 신규 설치 (농사단타 미국)
+- `screener/screen_samdoli_kr.py` — 업데이트 설치 (HTS 이미지 확인 기반 파라미터 전면 수정)
+- `docs/nongsa_danta_guide.html`, `docs/nongsa_signal_board.html`, `docs/samdoli_guide.html` — 신규 가이드 HTML
+
+**미완료**:
+- ticker_analyze.py 텔레그램 핸들러 등록 (`_stock.py`의 CommandHandler("mjstock") 교체)

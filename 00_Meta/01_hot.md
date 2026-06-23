@@ -7,15 +7,27 @@
 
 # 📝 프로젝트 핫토픽
 
-**최종 업데이트:** 2026-06-23 (자동 스캔 시스템 + 퀀트 DB 확장 + 차트 외부 접속 + HTML 초보자 설명)
+**최종 업데이트:** 2026-06-23 (Hermes1 버그 3종 수정 — scan_single / history_manager / permission_bridge)
 
 ## 📠 실시간 상태 (KV — /status 명령어로 설정)
 - **Active External Project**: `/Users/bluesea/Applications/Mjstock` (자동 스캔 시스템 구축 완료)
 - **Current Model (Telegram)**: GPT OSS 120B (기본, NVIDIA API) / DeepSeek API (폴백) / Qwen2.5-14B 로컬 (선택 가능)
 - **Current Model (WebUI)**: Qwen2.5-14B (로컬) / GPT OSS 120B (NVIDIA) / Minimax M2.7 (NVIDIA) — 3종 멀티모델 통합 완료
+- **Hermes1 PID**: 71365 (2026-06-23 재시작)
 - **llama-server**: 종료 가능 (Telegram GPT OSS 120B 모드 + WebUI 비-Qwen 선택 시 영향 없음)
 
 ## 📌 현재 진행 중인 작업
+
+### ✅ 완료 — Hermes1 버그 수정 3종 (2026-06-23)
+- **scan_single.py**: `get_exchange_code()` → `resolve_ticker_universe()` 교체. 빈 DataFrame 재시도(NAS/NYS/AMS). AAOI 등 나스닥 종목 `'close'` KeyError 해결
+- **history_manager.py**: `COMPACT_THRESHOLD` 30→60, `KEEP_RECENT` 10→15, 파일 저장 최근 20→10개. 세션 시작 직후 67% 포화 문제 해결
+- **permission_bridge.py**: `RUN_CMD` EXTERNAL_TOOLS → INTERNAL_TOOLS 이동. bash 실행 120초 타임아웃 "권한 없음" 오류 해결
+- **헤르메스 봇 재시작**: PID 71365
+
+### ✅ 완료 — MJstock 스캔 유니버스 전면 확장 (2026-06-23)
+- **auto_scan_morning.py**: 나스닥500 + 러셀500 + 코스피500 + 코스닥500 각각 별도 실행. 총 20스캔 / 07:00 KST
+- **auto_scan_intraday.py**: 동일 4유니버스 각각 별도 실행. 타임아웃 300s→600s. 총 12스캔 / 시간대별
+- **텔레그램**: 유니버스별 별도 메시지 수신 (8종 레이블). 연결 테스트 완료 ✅
 
 ### ✅ 완료 — MJstock 시간대별 자동 스캔 + 퀀트 DB 확장 + 차트 외부 접속 + HTML 초보자 설명 (2026-06-23)
 - **auto_scan_morning.py**: 미국 morning 스캔(07:00 KST)만 활성화. KR 블록 주석 처리. `--scan-type morning` 인자 추가

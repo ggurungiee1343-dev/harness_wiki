@@ -10,7 +10,7 @@ tags: []
 
 # 📝 프로젝트 핫토픽
 
-**최종 업데이트: 2026-06-23 21:41*
+**최종 업데이트: 2026-06-23 22:46*
 
 ## 📠 실시간 상태 (KV — /status 명령어로 설정)
 - **Active External Project**: `/Users/bluesea/Applications/Mjstock` (자동 스캔 시스템 구축 완료)
@@ -27,6 +27,9 @@ tags: []
 
 | 날짜 | 분야 | 교훈 |
 |---|---|---|
+| 2026-06-23 | 봇 핸들러 오타 | `history_mgr.get_saturation()` → 실제 메서드명 `get_context_pressure()`. 오타 하나가 봇 전체 무응답. 신규 기능 추가 후 반드시 단독 import 테스트: `python3 -c "from handlers._base import add_to_history; print('OK')"`  |
+| 2026-06-23 | launchctl 신뢰성 | 이 환경에서 `launchctl unload/load`는 Exit code 5로 실패 가능. 봇 재시작은 항상 Popen(start_new_session=True) — 새 프로세스 먼저 띄우고 기존 SIGTERM 순서 |
+| 2026-06-23 | botwatch 등록 | plist 파일 존재 != launchd 등록. 재부팅 후 반드시 `launchctl list com.hermes.botwatch`로 PID 확인. `-` 이면 bootstrap 재등록 필요 |
 | 2026-06-23 | MJstock 삼돌이/농사단타 | 삼돌이 OBV 조건 = `OBV < Signal` (반전 직전). 농사단타 OBV 조건 = `OBV > Signal` (순매수 완료). 방향이 반대 — 혼동 주의. |
 | 2026-06-23 | MJstock US import | screen_nongsa_danta_us.py 함수명은 `prepare_daily_us()` / `prepare_5min_us()` — `_us` 접미사 필수. `prepare_30min` 없음 → needs_30min: False 등록 필수. |
 | 2026-06-23 | subagent 권한 | 메인 세션의 Edit/Bash 권한이 subagent에 상속되지 않음. 메타 업데이트·파일 수정은 항상 메인 세션에서 직접 실행. |
@@ -656,7 +659,7 @@ gemma4 launchctl unload ~/Library/LaunchAgents/com.bluesea.llama_server2.plist
 - ⚠️ `meta_updater.py` 비활성화 상태 유지 중 (필요시 재활성화)
 
 
-|*최종 업데이트: 2026-06-23 21:41*
+|*최종 업데이트: 2026-06-23 22:46*
 
 ---
 

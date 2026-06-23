@@ -20,7 +20,7 @@
 - [[constitution]] - 봇 시스템 전체 헌법
 - [[constitution.local]] - 로컬 환경에 맞춰진 헌법 보완 파일
 - [[HERMES]] - 에이전트 코드베이스 및 아키텍처 규칙
-- [[SKILL_hermes_help_text_patch]] - 텔레그램 도움말 패치 스킬
+- [[_meta.py]] — `/claude_brief` (4대 메타 문서 브리핑 생성) · 🆕 `/save_wiki` (대화 분석 결과 wiki 저장) · 🆕 `/wiki_lint` (고아/오래된/깨진링크/빈 페이지 탐지)
 - [[hermes_harness_skill_모음]] - 🆕 2026-06-09: 커스텀 스킬 목록 + 호출 방법 + 동작 설명 관리 문서
 
 ## 📓 3. 시스템 운영 장부 (Meta Ledgers)
@@ -113,3 +113,12 @@
 | `하네스_논문_기반_개선_로그.md` | 논문 11편 기반 하네스 개선 전체 기록 (Why/What/How + 미적용 후속 항목) |
 
 *최종 업데이트: 2026-06-12 — 논문 기반 v9.4 업그레이드 신규 문서 등록*
+
+## 신규 기능 — 2026-06-21
+
+| 파일 | 변경 내용 |
+|---|---|
+| `modules/wiki_manager.py` | `write_wiki()` · `lint_wiki()` 메서드 2개 추가 — Karpathy LLM-Wiki 패턴 적용 |
+| `handlers/_meta.py` | `/save_wiki` · `/wiki_lint` 핸들러 2개 추가 (`/claude_brief` 기존 유지) |
+
+*최종 업데이트: 2026-06-21 — Karpathy LLM-Wiki 패턴 적용 (wiki_manager + _meta 신규 기능 2종)*

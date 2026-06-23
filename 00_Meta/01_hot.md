@@ -7,15 +7,23 @@
 
 # 📝 프로젝트 핫토픽
 
-**최종 업데이트:** 2026-06-23 (HTML 문서 업데이트 + HTS 이미지 독해)
+**최종 업데이트:** 2026-06-23 (자동 스캔 시스템 + 퀀트 DB 확장 + 차트 외부 접속 + HTML 초보자 설명)
 
 ## 📠 실시간 상태 (KV — /status 명령어로 설정)
-- **Active External Project**: `/Users/bluesea/Applications/Mjstock` (MJstock HTML 문서 정비 중)
+- **Active External Project**: `/Users/bluesea/Applications/Mjstock` (자동 스캔 시스템 구축 완료)
 - **Current Model (Telegram)**: GPT OSS 120B (기본, NVIDIA API) / DeepSeek API (폴백) / Qwen2.5-14B 로컬 (선택 가능)
 - **Current Model (WebUI)**: Qwen2.5-14B (로컬) / GPT OSS 120B (NVIDIA) / Minimax M2.7 (NVIDIA) — 3종 멀티모델 통합 완료
 - **llama-server**: 종료 가능 (Telegram GPT OSS 120B 모드 + WebUI 비-Qwen 선택 시 영향 없음)
 
 ## 📌 현재 진행 중인 작업
+
+### ✅ 완료 — MJstock 시간대별 자동 스캔 + 퀀트 DB 확장 + 차트 외부 접속 + HTML 초보자 설명 (2026-06-23)
+- **auto_scan_morning.py**: 미국 morning 스캔(07:00 KST)만 활성화. KR 블록 주석 처리. `--scan-type morning` 인자 추가
+- **auto_scan_intraday.py**: 미국 intraday 스캔(22:30 KST)만 활성화. KR `return 0` 즉시 종료. `--scan-type intraday` 인자 추가
+- **run_scan.py**: `compute_quant_snapshot()` — ret_30d/60d/90d 추가. `compute_intraday_signal_snapshot()` 신규 (7컬럼, US/KR 자동 구분). `--scan-type` CLI 인자, `run_one(scan_type)` 파라미터 추가
+- **batch_fill_returns.py**: `[5,10,20]` → `[5,10,20,30,60,90]` 확장. 종목별 현재가 1회 호출 최적화
+- **handlers/_stock.py `_handle_mjstock_chart()`**: 로컬 IP URL → `bot.send_document()` HTML 첨부 방식 전환 (외부망 접근 가능)
+- **docs/ 5종 HTML**: nongsa_danta/samdoli/nongsa_signal_board/korean_original_formulas/kr_to_us_conversion — 초보자 설명박스 + SVG 비유 차트 신규 추가
 
 ### ✅ 완료 — MJstock HTML 문서 업데이트 (2026-06-23)
 - **korean_original_formulas.html**: 5개 전략 섹션에 "HTS 원본 전략식 (사진 직접 독해)" div 블록 추가

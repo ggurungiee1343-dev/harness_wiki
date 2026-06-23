@@ -1,3 +1,6 @@
+---
+tags: []
+---
 # CLAUDE.md — Claude Code 세션 초기화 규칙
 > 이 파일은 Claude Code 세션 시작 시 자동으로 읽힙니다.
 > 관리 위치: `/Users/bluesea/Applications/Mjobsidian/wiki/00_Meta/CLAUDE.md`
@@ -35,11 +38,12 @@
 ## 3. 절대 수정 금지 (Lock Stack)
 
 아래 파일은 **허락 없이 절대 수정하지 말 것**:
-- `modules/bio_memory_engine.py`
 - `modules/cove_engine.py` (위치: `Scripts/cove_engine.py`)
 - `modules/deriver_layer.py`
 - `modules/dreamer_layer.py`
 - `~/.hermes/constitution.local.md`
+
+> **2026-06-23 Lock Stack 변경**: `bio_memory_engine.py` 잠금 해제 — SRP 분할 및 Dreaming 결함 #5 수정 완료. 분할 후 신규 파일(`vector_engine.py`)은 리팩토링 완료 시까지 잠금 불필요.
 
 ---
 
@@ -68,10 +72,22 @@
 | `05_시스템 상태.md` | 모든 코드 변경, 버그 수정, 새 기능 |
 | `02_스크립트 정보.md` | 신규 모듈/함수, 모듈 개수 변화, 흐름 구조도 변경 |
 | `06_에이전트_오류_및_재발방지_보고서.md` | 버그 수정, 예외 처리 추가 |
-| `01_hot.md` | 진행 중 작업 상태 변경 |
+| `01_hot.md` | 진행 중 작업 상태 변경, **Lessons Learned 실시간 추가** |
 | `03_시스템 인벤토리.md` | 새 패키지 설치, 환경 변경 |
 | `00_Meta_지도.md` | 신규 문서 생성 |
 | `claude_briefing.md` | 시스템 구조 대규모 변경 (자동: `/claude_brief`) |
+
+### Lessons Learned 라우팅 규칙 (2026-06-23 추가)
+
+"나중에 이걸 왜 이렇게 했지?" 라는 질문이 생길 것 같은 순간 → **즉시 01_hot.md Lessons Learned 테이블에 한 줄 추가**
+
+| 상황 | 어디에 쓰나 | 형식 |
+|---|---|---|
+| 버그 원인 파악 + 재발방지 패턴 필요 | `06_에이전트_오류_및_재발방지_보고서.md` | 무거운 형식 (증상·원인·수정·재발방지) |
+| 작업 중 발견한 비직관적 패턴·판단 근거·설계 이유 | `01_hot.md` → `## 💡 Lessons Learned` 테이블 | 한 줄 형식 (날짜 \| 분야 \| 교훈) |
+| 아키텍처·모듈 설계 결정 | `06_에이전트_오류_및_재발방지_보고서.md` + Lessons Learned 양쪽 | 크로스 참조 |
+
+**작성 원칙**: 채팅이 닫히기 전에 쓴다. Lessons Learned는 버그가 아니어도 쓴다. 나중에 같은 질문을 반복하지 않기 위해 쓴다.
 
 ### 커스텀 스킬 (자연어 트리거)
 
@@ -128,3 +144,6 @@
 ---
 *관리: `/Users/bluesea/Applications/Mjobsidian/wiki/00_Meta/CLAUDE.md`*
 *연관: `claude_briefing.md`, `constitution.local.md`, `guardrails.md`, `USER.md`*
+
+---
+*최종 업데이트: 2026-06-23 21:19*

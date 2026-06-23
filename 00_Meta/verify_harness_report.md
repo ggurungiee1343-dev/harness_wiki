@@ -1,38 +1,39 @@
+---
+tags: []
+---
 # Hermes 구조 진단 리포트
 > 자동 생성 — `/verify_harness` 실행 시마다 현재 상태 덮어씌움
-> 최종 진단: 2026-06-09 20:51 | 점수: **95/100** | 등급: **S**
+> 최종 진단: 2026-06-23 21:08 | 점수: **67/100** | 등급: **B**
 > 이력: 최근 20회 자동 보존 (오래된 항목 자동 삭제)
 
 ---
 
-## 현재 상태 (2026-06-09 20:51)
+## 현재 상태 (2026-06-23 21:08)
 
-**📊 종합 점수: 95/100 — 🟢 S — 매우 양호**
+**📊 종합 점수: 67/100 — 🟡 B — 보통 (일부 개선 권장)**
 
 ### 📏 파일 비대화
-- 🟡 bio_memory_engine.py — 877줄 (경고: 600+)
-- 🟡 ingest_engine.py — 642줄 (경고: 600+)
-- 🟡 knowledge_indexer.py — 631줄 (경고: 600+)
-- 🟢 hermes_local.py — 477줄 (주의: 300+)
+- 🔴 _stock.py — 1034줄 (위험: 900+, SRP 분할 권장)
+- 🔴 bio_memory_engine.py — 956줄 (위험: 900+, SRP 분할 권장)
+- 🟢 stock_mcp_server.py — 473줄 (주의: 300+)
+- 🟢 hermes_local.py — 534줄 (주의: 300+)
 - 🟢 web_agent_module.py — 506줄 (주의: 300+)
-- 🟢 hermes_file_ops.py — 493줄 (주의: 300+)
 
 ### 🔗 모듈 의존성 (SRP)
 - ✅ harness_agent.py — modules import 7개 (정상)
 - ✅ hermes_local.py — modules import 1개 (정상)
 
 ### 📚 문서 동기화
-- ✅ 문서 언급 파일 전부 실존
-- 📄 미문서화 신규 파일: `hermes_handlers_backup_20260526.py` — 02_스크립트 정보.md 업데이트 필요
+- ❌ 02_스크립트 정보.md 파일을 찾을 수 없음
 
 ### ⚡ 서비스 상태
-- ✅ Hermes1 봇 (com.hermes.bot) — PID 51048 실행중
-- ✅ Hermes2 봇 (ai.hermes2.bot) — PID 1056 실행중
-- ✅ Gateway (ai.hermes.gateway) — PID 29772 실행중
+- ✅ Hermes1 봇 (com.hermes.bot) — PID 71365 실행중
+- ✅ Hermes2 봇 (ai.hermes2.bot) — PID 917 실행중
+- ✅ Gateway (ai.hermes.gateway) — PID 4147 실행중
 
 ### 🧠 메모리 파일
-- ✅ L1 harness_memory — 19KB (정상)
-- ✅ L2 episodic_memory — 2438KB (정상)
+- ✅ L1 harness_memory — 5KB (정상)
+- ✅ L2 episodic_memory — 583KB (정상)
 - ✅ L3 semantic_memory — 4KB (정상)
 
 ### 🗑️ 임시 파일
@@ -44,6 +45,7 @@
 
 | 날짜 | 점수 | 등급 | 주요 이슈 | 서비스 |
 |---|---|---|---|---|
+| 2026-06-23 21:08 | 67/100 | B | 🔴2개 | 3/3 |
 | 2026-06-09 20:51 | 95/100 | S | 📄1개 | 3/3 |
 | 2026-06-09 01:43 | 94/100 | S | 📄1개 | 3/3 |
 | 2026-06-09 01:42 | 81/100 | A | 👻5개 | 3/3 |
@@ -56,3 +58,6 @@
 
 ---
 *관련: `modules/harness_verifier.py` | 텔레그램: `/verify_harness` | 연관: `02_스크립트 정보.md`*
+
+---
+*최종 업데이트: 2026-06-23 21:08*

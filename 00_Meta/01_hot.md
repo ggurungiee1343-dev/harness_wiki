@@ -1,3 +1,6 @@
+---
+tags: []
+---
 ## ⚖️ 최근 감사 결과 (Dreaming)
 **[목표 진척도]**
 사용자의 기술적 문제(명령어 오류, 메모리 구조화)에 대해 구체적인 해결책과 설계안을 제시함으로써 '유용성' 측면에서 높은 진척도를 보이고 있습니다. 요청된 데이터 구조화 및 관리 설계 작업을 즉각 수행하며 장기 목표를 충실히 이행 중입니다.
@@ -7,7 +10,7 @@
 
 # 📝 프로젝트 핫토픽
 
-**최종 업데이트:** 2026-06-23 (Hermes1 버그 3종 수정 — scan_single / history_manager / permission_bridge)
+**최종 업데이트: 2026-06-23 21:41*
 
 ## 📠 실시간 상태 (KV — /status 명령어로 설정)
 - **Active External Project**: `/Users/bluesea/Applications/Mjstock` (자동 스캔 시스템 구축 완료)
@@ -16,7 +19,56 @@
 - **Hermes1 PID**: 71365 (2026-06-23 재시작)
 - **llama-server**: 종료 가능 (Telegram GPT OSS 120B 모드 + WebUI 비-Qwen 선택 시 영향 없음)
 
+## 💡 Lessons Learned
+
+> **목적**: 버그가 아니어도, 채팅이 닫히기 전에 기록해야 할 패턴·발견·판단 근거를 실시간으로 쌓는 곳.
+> **06번 보고서와 차이**: 06번 = 버그 원인·재발방지(무거운 형식). 여기 = 작업 중 발견한 판단 근거·패턴·비직관적 사실(가벼운 형식).
+> **작성 트리거**: "나중에 이걸 왜 이렇게 했지?" 라는 질문이 생길 것 같은 모든 순간.
+
+| 날짜 | 분야 | 교훈 |
+|---|---|---|
+| 2026-06-23 | MJstock 삼돌이/농사단타 | 삼돌이 OBV 조건 = `OBV < Signal` (반전 직전). 농사단타 OBV 조건 = `OBV > Signal` (순매수 완료). 방향이 반대 — 혼동 주의. |
+| 2026-06-23 | MJstock US import | screen_nongsa_danta_us.py 함수명은 `prepare_daily_us()` / `prepare_5min_us()` — `_us` 접미사 필수. `prepare_30min` 없음 → needs_30min: False 등록 필수. |
+| 2026-06-23 | subagent 권한 | 메인 세션의 Edit/Bash 권한이 subagent에 상속되지 않음. 메타 업데이트·파일 수정은 항상 메인 세션에서 직접 실행. |
+| 2026-06-23 | SRP 분할 | bio_memory_engine.py 분할 시 ImportanceScorer/ForgettingCurve 중복 정의를 제거하고 deriver_layer에서 import — Lock Stack 파일에서 가져오는 것이므로 경로/클래스명 변경 없이 유지. |
+| 2026-06-23 | Dreaming 트리거 | random.random() 기반 조기 종료는 절대 금지. 트리거 조건은 실측 가능한 값(이벤트 수, 경과 시간, 용량)으로만 결정. |
+| 2026-06-23 | hot.md 경로 | dreaming_v2.py의 _append_to_hot_md 경로는 `wiki/00_Meta/01_hot.md` — `Mjobsidian/hot.md` 루트에 쓰면 stamper 감지 안 됨. |
+| 2026-06-23 | 메타 파일명 | 메타 파일 경로 참조 시 공백 아닌 언더스코어 표준 — `02_스크립트_정보.md` (O), `02_스크립트 정보.md` (X). |
+| 2026-06-23 | MJstock KIS API | `get_exchange_code()` 단독 사용 금지. CSV 기반 `resolve_ticker_universe()` → 빈 DataFrame 시 NAS/NYS/AMS 순차 재시도 패턴이 표준. |
+| 2026-06-23 | history_manager | 파일 저장 메시지 수(N)와 COMPACT_THRESHOLD(T) 관계: N/T < 0.5 유지. 현재 10/60=16.7%. 이 비율 깨지면 세션 시작 즉시 포화. |
+| 2026-06-23 | permission_bridge | 개인 봇에서 bash 자동 승인은 INTERNAL_TOOLS 분류. 단, 결제·삭제·외부 민감 API는 EXTERNAL 유지 — 이 경계선 흐리지 말 것. |
+| 2026-06-23 | EMA 조건 구현 | 검색식 조건 부등호는 PDF 원본 그대로. `EMA_단기 > EMA_장기` = 상승배열. 헷갈리면 반드시 PDF 재확인. |
+| 2026-06-09 | 루프 아키텍처 | 루프 = 크론 + 루프 본체 의사결정자. 마법은 루프 안의 피드백. CoVe + ToolResult + Circuit Breaker = 피드백 품질 체계. |
+| 2026-06-03 | 파일 수정 | 기존 파일 수정 시 write_file(전체 덮어쓰기) 절대 금지 → Edit(patch)만. write_file = 기존 내용 소실 위험. |
+
+---
+
 ## 📌 현재 진행 중인 작업
+
+### ✅ 완료 — MJstock 삼돌이/농사단타 현지화 + HTML 5종 통합 (2026-06-23)
+- **screen_samdoli_kr/us.py**: KR/US 현지화. US = 시총 $1B↑, 거래량변화 150%↑, SMA200 추가
+- **screen_nongsa_danta_kr/us.py**: 삼돌이 후보 대상 3박자(50억봉+3매수+OBV) 단타. US는 30분봉 미사용
+- **run_scan.py**: 4개 검색기 레지스트리 등록 + 임포트 검증 성공
+- **docs/ 파일**: 8개→5개 (samdoli_guide / nongsa_danta_guide / nongsa_signal_board 삭제, 내용 흡수)
+- **사용설명서**: 6대→10대 검색식, 카드/타이밍표/파라미터표/선택가이드 업데이트
+- **signals_entry_points**: 섹션13 삼돌이/농사단타 Phase 가이드 추가
+- **korean_original_formulas**: S9(삼돌이KR), S10(농사단타KR) 수식 추가
+- **kr_to_us_conversion**: S8(삼돌이US), S9(농사단타US) 변환표 추가
+
+### ✅ 완료 — MJstock screener 개선 v3 (2026-06-23)
+- **signal_tracker.py**: `score_delta` / `reversal_early` 컬럼 추가. `record_scan()` 파라미터 `score_delta_map` 추가
+- **batch_fill_returns.py**: `_trading_days_elapsed()` 도입 — 거래일 기준 수익률 채움 (캘린더일 → 영업일)
+- **future_screeners/** 신규 폴더: 삼돌이/농사단타 미적용 검색기 코드 4개 파일 보관
+- **docs/ HTML 2종 업데이트**: quant_logic_analysis.html (22컬럼), signals_entry_points.html (신규 컬럼 설명)
+- **20260620_1_개선사항 폴더**: 모든 기능 반영 완료 확인 → 삭제 예정 (MJ 직접 삭제)
+
+### ✅ 완료 — bio_memory_engine.py SRP 분할 + 핵심 버그 수정 5종 (2026-06-23)
+- **bio_memory_engine.py**: 955줄 → 627줄 (SRP 분할). 벡터 계층 → vector_engine.py 분리. ImportanceScorer/ForgettingCurve 중복 제거
+- **vector_engine.py**: 신규 생성 — TurboVecLight, VectorIndexManager, get_vector_backend 등 벡터 인덱스 계층 전담
+- **dreaming_v2.py**: 결함 #5(PEMS 고착화) 수정. random.random() 기반 조기 종료 제거 → 이벤트 수 + 1시간 간격 체크로 교체. hot.md 경로 버그 동시 수정
+- **hermes_local.py**: PID 충돌 자동복구 추가 (Conflict 에러 감지 → launchctl kickstart 자동 실행)
+- **handlers/_base.py**: 메모리 포화도 자동 압축 추가 (add_to_history()에서 포화 감지 → compact_and_save() 자동 호출)
+- **modules/harness_verifier.py**: 파일명 버그 수정 (`02_스크립트 정보.md` 공백 → `02_스크립트_정보.md` 언더스코어)
 
 ### ✅ 완료 — Hermes1 버그 수정 3종 (2026-06-23)
 - **scan_single.py**: `get_exchange_code()` → `resolve_ticker_universe()` 교체. 빈 DataFrame 재시도(NAS/NYS/AMS). AAOI 등 나스닥 종목 `'close'` KeyError 해결
@@ -297,7 +349,7 @@
 - **조치 3**: `01_hot.md`에 활성 외부 프로젝트 경로 등록. `06_에이전트_오류_및_재발방지_보고서.md` 발행 완료.
 
 ### ✅ 완료 — 태그 자동화(최대 8개) 확장 및 하네스 컨트롤 가이드 작성 (2026-06-03)
-- **요약**: `wiki_auto_stamper.py`를 확장하여 실시간 저장 시 태그 8개 자동 조율 및 [[링크]] 텍스트화 적용. 하네스 컨트롤(harness, hdod, hstatus, hrollback)의 상세 분석 가이드 생성 및 깨진 링크 정리.
+- **요약**: `wiki_auto_stamper.py`를 확장하여 실시간 저장 시 태그 8개 자동 조율 및 링크 텍스트화 적용. 하네스 컨트롤(harness, hdod, hstatus, hrollback)의 상세 분석 가이드 생성 및 깨진 링크 정리.
 - **연관 파일**: `wiki_auto_stamper.py`, `하네스_컨트롤_가이드.md`, `00_Meta_지도.md`, `INDEX.md`
 
 ### ❌ 진행 중 — HERMES3_ENCYCLOPEDIA.md write_file 덮어쓰기 사고 (2026-06-03)
@@ -473,14 +525,14 @@
 - **`_build_tag_prompt` 제거**: dead code 정리. `_build_classify_prompt`(one-shot 예시 + 엄격 JSON)로 통일
 - **`cmd_ingest()` — `_call_llm` 연결**: IngestEngine(source_dir, dest_dir, llm_func=_call_llm) 호출
 - **버그 수정**: frontmatter 업데이트 후 `write_text()` 누락 → `f.write_text(updated_text)` → `shutil.move` 순서로 수정
-- **태그 기반 전환 유지**: 링크 ❌, `[[위키 링크]]` 미생성. tags=[scanned, 카테고리]로 분류
-- **관련**: [[스크립트 정보]], [[시스템 상태]], [[주요 시스템 가이드 및 FAQ]], [[시스템 인벤토리]]
+- **태그 기반 전환 유지**: 링크 ❌, `위키 링크` 미생성. tags=[scanned, 카테고리]로 분류
+- **관련**: 스크립트 정보, 시스템 상태, 주요 시스템 가이드 및 FAQ, 시스템 인벤토리
 
 ### ✅ 완료 — Python 3.10 호환성 문제 해결 (2026-05-27)
 - **문제**: `dialectic_layer/_dreamer.py` (line 202)와 `hermes_context_builder.py` (line 43)에서 `str | None` (PEP 604) 문법 사용 → macOS 기본 Python 3.9.6에서 SyntaxError 발생
 - **해결**: 두 파일 상단에 `from __future__ import annotations` 한 줄씩 추가
 - **결과**: handlers/ 9개 서브모듈 전부 Python 3.9.6에서 import 성공
-- **관련**: [[시스템 상태]], [[주요 시스템 가이드 및 FAQ]], [[시스템 인벤토리]]
+- **관련**: 시스템 상태, 주요 시스템 가이드 및 FAQ, 시스템 인벤토리
 
 ### ✅ 완료 — 테스트 인프라 구축 (2026-05-27)
 - **pytest 8.4.2** 설치 완료 (base Python3)
@@ -493,7 +545,7 @@
   - `test_hybrid_router.py` — HybridRouter.is_sensitive 9개 smoke
 - **결과**: **87 passed, 0 skipped, 0 failed** (0.48s)
 - **참고**: 기존 handler import skip 조건 제거 (Python 3.10 버전 체크 삭제)
-- **관련**: [[스크립트 정보]], [[시스템 인벤토리]], [[시스템 상태]]
+- **관련**: 스크립트 정보, 시스템 인벤토리, 시스템 상태
 
 ### 📌 style_profile 읽기 길이 — 1000자 유지 확정
 - dream_scheduler.py Phase 3: style_profile.md(4447 bytes) `[:1000]`로 truncation
@@ -547,11 +599,11 @@
 ---
 
 🔗 **관련 문서**
-- [[00_Meta_지도]] — 메타 폴더 내비게이션
-- [[시스템 상태]] — 전체 변경 이력
-- [[스크립트 정보]] — 모듈 및 명령어 가이드
-- [[주요 시스템 가이드 및 FAQ]] — 문제 해결 및 Changelog
-- [[시스템 인벤토리]] — 설치 환경 정보
+- 00_Meta_지도 — 메타 폴더 내비게이션
+- 시스템 상태 — 전체 변경 이력
+- 스크립트 정보 — 모듈 및 명령어 가이드
+- 주요 시스템 가이드 및 FAQ — 문제 해결 및 Changelog
+- 시스템 인벤토리 — 설치 환경 정보
 - [2026-06-03] 메모리 누락 명령어(/memory) 복구 및 Dreaming v2 PEMS 엔진 고착화(수렴 버그) 수정 완료. (offline_consolidation 흐름 정상화)
 gemma4 launchctl unload ~/Library/LaunchAgents/com.bluesea.llama_server2.plist
         launchctl load ~/Library/LaunchAgents/com.bluesea.llama_server2.plist
@@ -563,7 +615,7 @@ gemma4 launchctl unload ~/Library/LaunchAgents/com.bluesea.llama_server2.plist
 - ✅ **dreamer_layer.py**: `offline_consolidation_forced()` 메서드 추가(270-296행) — 중요도 하위 50% 강제 L3 전이 (1MB 초과 시 자동 발동)
 - ✅ **dreaming_v2.py**: `_run_offline_consolidation()`에 용량 위기 시 강제 증류 호출(124-128행) + `_commit_to_l3_semantic()` atomic write 적용(230-274행)
 - ✅ **import 검증**: 3개 파일 전부 Python import 정상 확인
-- **연관**: [[03_시스템 인벤토리]], [[05_시스템 상태]], [[04_주요 시스템 가이드 및 FAQ]], [[00_Meta_지도]], [[06_에이전트_오류_및_재발방지_보고서]], [[constitution.local]]
+- **연관**: 03_시스템 인벤토리, 05_시스템 상태, 04_주요 시스템 가이드 및 FAQ, 00_Meta_지도, 06_에이전트_오류_및_재발방지_보고서, constitution.local
 
 ## 2026-06-03 작업 완료 목록
 
@@ -573,7 +625,7 @@ gemma4 launchctl unload ~/Library/LaunchAgents/com.bluesea.llama_server2.plist
 - ✅ HELP_TEXT 완전판 업데이트 (33개 명령어)
 - ✅ wiki 전체 59개 파일 타임스탬프 일괄 복구
 - ✅ `constitution.md` §9 타임스탬프 의무 갱신 규칙 신설
-- ✅ `wiki_auto_stamper.py` 기능 확장 (태그 최대 8개 병합, [[링크]] 텍스트화 및 긍정형 전방탐색 파싱)
+- ✅ `wiki_auto_stamper.py` 기능 확장 (태그 최대 8개 병합, 링크 텍스트화 및 긍정형 전방탐색 파싱)
 - ✅ `지식 베이스 사용 가이드.md` 링크 정리 (00_Meta_지도.md, INDEX.md 깨진 링크 제거)
 - ✅ `하네스_컨트롤_가이드.md` 상세 분석서 작성 및 메타폴더 하부 저장
 - ✅ `Bio_Memory_Engine_가이드.md` 전면 현행화
@@ -604,7 +656,7 @@ gemma4 launchctl unload ~/Library/LaunchAgents/com.bluesea.llama_server2.plist
 - ⚠️ `meta_updater.py` 비활성화 상태 유지 중 (필요시 재활성화)
 
 
-|*최종 업데이트: 2026-06-07 22:00 — WebUI 멀티모델 통합, NIM→GPT OSS 120B, Skills 115개 비활성화, 메타 7종 갱신*
+|*최종 업데이트: 2026-06-23 21:41*
 
 ---
 
@@ -641,7 +693,7 @@ gemma4 launchctl unload ~/Library/LaunchAgents/com.bluesea.llama_server2.plist
 - **사용법**: `switch-model got` → GPT-OSS-120B (NVIDIA) 로 전환 / `switch-model deepseek` → DeepSeek Chat 으로 전환
 - **적용 범위**: 두 Hermes Home 모두 적용 (`~/.hermes/config.yaml` + `venu/.hermes2/config.yaml`)
 - **특징**: 기존 설정 삭제 안 함. `# [SWITCHED to ...]` 주석으로 전환 상태 표시. 전환 후 `hermes gateway restart` 필요.
-- **연관**: [[00_Meta_지도]], [[03_시스템 인벤토리]], [[02_스크립트 정보]]
+- **연관**: 00_Meta_지도, 03_시스템 인벤토리, 02_스크립트 정보
 
 ## 📋 2026-06-06 업데이트 내역: 텔레그램 UX 개선 및 NVIDIA/날씨 오류 패치
 

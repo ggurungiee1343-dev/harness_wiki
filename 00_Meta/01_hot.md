@@ -7,15 +7,22 @@
 
 # 📝 프로젝트 핫토픽
 
-**최종 업데이트:** 2026-06-09 21:00
+**최종 업데이트:** 2026-06-23 (HTML 문서 업데이트 + HTS 이미지 독해)
 
 ## 📠 실시간 상태 (KV — /status 명령어로 설정)
-- **Active External Project**: `/Users/bluesea/Applications/MarineOS-XR Project` (우선 스캔 경로)
+- **Active External Project**: `/Users/bluesea/Applications/Mjstock` (MJstock HTML 문서 정비 중)
 - **Current Model (Telegram)**: GPT OSS 120B (기본, NVIDIA API) / DeepSeek API (폴백) / Qwen2.5-14B 로컬 (선택 가능)
 - **Current Model (WebUI)**: Qwen2.5-14B (로컬) / GPT OSS 120B (NVIDIA) / Minimax M2.7 (NVIDIA) — 3종 멀티모델 통합 완료
 - **llama-server**: 종료 가능 (Telegram GPT OSS 120B 모드 + WebUI 비-Qwen 선택 시 영향 없음)
 
 ## 📌 현재 진행 중인 작업
+
+### ✅ 완료 — MJstock HTML 문서 업데이트 (2026-06-23)
+- **korean_original_formulas.html**: 5개 전략 섹션에 "HTS 원본 전략식 (사진 직접 독해)" div 블록 추가
+- **kr_to_us_conversion.html**: 5개 전략 섹션에 HTS 원본 전략식 pre 블록 추가
+- **signals_entry_points.html**: "초보자 빠른 이해" 섹션 신규 추가 (농사단타 3단계 흐름, SVG 5분봉 타점 차트, 손절/익절 카드)
+- **quant_logic_analysis.html**: "초보자 빠른 이해" 섹션 신규 추가 (전체 흐름 SVG, S/A/B/PASS 등급 카드)
+- **미완료**: `MJstock_사용설명서.html` 업데이트 (다음 세션 과제)
 
 ### ✅ 완료 — MJstock 검색기 개선 v2 (2026-06-23)
 - **ticker_analyze.py**: 분석 결과 텔레그램 메시지 하단에 Claude 인지편향 체크 프롬프트 템플릿 자동 첨부 ("위 종목 {ticker} 점수 {score}점 나왔는데 인지편향 체크리스트랑 청산 조건 잡아줘")

@@ -30,6 +30,7 @@ tags: []
 
 | 날짜 | 분야 | 교훈 |
 |---|---|---|
+| 2026-06-24 | Hermes1 봇 재시작 (BOT-001) | 봇 "자주 뻑감"의 근본 원인 = **재시작 이중화**. botwatch의 nohup 폴백이 launchd 바깥 유령 프로세스 생성 → KeepAlive가 또 하나 띄움 → 두 봇이 getUpdates Conflict로 상호 사망. 봇 재시작은 **반드시 launchd 경로**(`launchctl enable` → `kickstart -k`)로만. 수동 nohup 금지. 진단: `pgrep -f "Scripts/hermes_local.py" \| wc -l`(=1이어야 정상), `launchctl print gui/$(id -u)/com.hermes.bot \| grep state`. 구버전 `com.bluesea.hermes_local.plist.disabled`(~/hermes/ 경로) 절대 enable 금지. 상세: 06번 BOT-001. |
 | 2026-06-24 | 검증층 | 압축 시 안전 규칙 증발(Governance Decay, arXiv 2606.22528). history_manager compact_and_save + get_history_for_llm 양쪽에 GOVERNANCE_ANCHOR 삽입으로 방어. 압축 후 LLM 컨텍스트 맨 앞에 Lock Stack 4개 항상 살아있어야 함. |
 | 2026-06-24 | 검증층 | 메모리 오염(Memory Contagion, arXiv 2606.23195): 편향 평가가 L2/L3 메모리 통해 누적 전파. bio_memory_engine L2 promote 시 confidence + observation_count + provenance 필드로 불확실 기억(confidence < 0.6) 격리. |
 | 2026-06-24 | 검증층 | 스킬 커버리지 측정은 weakness_miner.get_skill_coverage()로. ~/.hermes/skills + ~/.claude/skills 전체 스캔 → 호출률 반환. /status 명령어에서 미호출 스킬 목록 확인 가능. 스킬 추가 후 반드시 한 번은 실제 호출해야 coverage에 잡힘. |

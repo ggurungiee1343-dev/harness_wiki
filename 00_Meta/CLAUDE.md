@@ -139,6 +139,18 @@ tags: []
 - `~/Applications/` 밖에 파일 생성/설치 금지
 - Hermes1(`~/.hermes`)과 Hermes2(`~/.hermes2`) 경로 혼용 금지
 - 추측성 답변 금지 — 파일 존재 여부는 반드시 직접 확인
+- **Hermes1 봇을 `nohup`/수동 `python hermes_local.py`로 직접 실행 금지** (이중 인스턴스 → getUpdates Conflict → 상호 사망). 재시작은 launchd 경로만
+- **`com.bluesea.hermes_local.plist.disabled` enable 금지** — 구버전(`~/hermes/` 경로). 정식은 `com.hermes.bot`(`Scripts/hermes_local.py`)
+
+### Hermes1 봇 재시작 표준 절차 (2026-06-24 BOT-001 확정)
+봇이 안 뜨거나 "이미 실행 중" 반복 시 — **반드시 이 순서로만**:
+```bash
+launchctl enable gui/$(id -u)/com.hermes.bot       # disabled 드리프트 해제
+launchctl kickstart -k gui/$(id -u)/com.hermes.bot # 정식 재시작
+pgrep -f "Scripts/hermes_local.py" | wc -l          # 1이어야 정상(이중 인스턴스 아님)
+```
+- 진단: `launchctl print gui/$(id -u)/com.hermes.bot | grep state`
+- botwatch(`check_bot_alive.sh`)가 5분마다 자동 복구. `botwatch.log`에 `nohup 직접 실행` 보이면 수정 되돌려진 것 → 06번 BOT-001 참조
 
 ---
 
@@ -147,6 +159,7 @@ tags: []
 | 목적 | 사용 스크립트 |
 |---|---|
 | 서비스 상태 점검 | `Scripts/check_services.sh` |
+| Hermes1 봇 재시작 | `launchctl enable gui/$(id -u)/com.hermes.bot && launchctl kickstart -k gui/$(id -u)/com.hermes.bot` |
 | API 엔드포인트 확인 | `Scripts/model_endpoint_check.sh` |
 | WebUI 캐시 삭제 | `Scripts/clear_webui_cache.sh` |
 | venv 패치 확인 | `Scripts/check_venv_patches.sh` |
@@ -178,4 +191,4 @@ tags: []
 *연관: `claude_briefing.md`, `constitution.local.md`, `guardrails.md`, `USER.md`*
 
 ---
-*최종 업데이트: 2026-06-23 23:50*
+*최종 업데이트: 2026-06-24 22:42*

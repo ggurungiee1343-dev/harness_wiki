@@ -10,7 +10,7 @@ tags: []
 
 # 📝 프로젝트 핫토픽
 
-**최종 업데이트: 2026-06-23 22:46*
+**최종 업데이트: 2026-06-24 11:51*
 
 ## 📠 실시간 상태 (KV — /status 명령어로 설정)
 - **Active External Project**: `/Users/bluesea/Applications/Mjstock` (자동 스캔 시스템 구축 완료)
@@ -24,9 +24,16 @@ tags: []
 > **목적**: 버그가 아니어도, 채팅이 닫히기 전에 기록해야 할 패턴·발견·판단 근거를 실시간으로 쌓는 곳.
 > **06번 보고서와 차이**: 06번 = 버그 원인·재발방지(무거운 형식). 여기 = 작업 중 발견한 판단 근거·패턴·비직관적 사실(가벼운 형식).
 > **작성 트리거**: "나중에 이걸 왜 이렇게 했지?" 라는 질문이 생길 것 같은 모든 순간.
+>
+> **정리 정책 (2026-06-23 확정)**: 자동화 없음 — 로직 자체가 관리 부담. **30줄 초과 시 Claude가 세션 시작 시 "Lessons Learned 정리할까요?" 제안.**
+> 정리 기준: ① 모든 세션 필수 지식 → CLAUDE.md 승격 후 삭제 ② 06번 보고서에 이미 있는 버그 패턴 → 삭제 ③ 3개월 이상 경과 + 더 이상 관련 없음 → 삭제 ④ 여전히 실수할 것 같은 패턴 → 유지
 
 | 날짜 | 분야 | 교훈 |
 |---|---|---|
+| 2026-06-24 | MJstock 텔레그램 HTML | 텔레그램 원격 접속 시 로컬 IP 링크 전송 불가 → 자기완결형 HTML 파일로 `send_document` 전송이 정답. CDN Plotly.js + data만 추출하면 4.9MB → 1.4MB로 절감. |
+| 2026-06-24 | MJstock 콜백 봇 | 두 봇이 같은 토큰으로 getUpdates 폴링 → 409 Conflict → 양쪽 사망. 독립 콜백 봇 대신 기존 Hermes 봇에 콜백 핸들러(`mjstock_results__` prefix) 추가하는 방식이 정답. |
+| 2026-06-24 | NASDAQ API | NASDAQ Screener API `marketCap` 필드는 T/B/M suffix 없는 순수 달러 숫자 문자열. `_parse_cap()`에서 suffix 처리 로직 불필요. |
+| 2026-06-24 | pandas column 타입 | DataFrame 컬럼명이 integer일 수 있음 → `c.lower()` AttributeError. 반드시 `str(c).lower()` 변환 후 메서드 호출. CSV 로드 시 컬럼명 타입 확인 필수. |
 | 2026-06-23 | 봇 핸들러 오타 | `history_mgr.get_saturation()` → 실제 메서드명 `get_context_pressure()`. 오타 하나가 봇 전체 무응답. 신규 기능 추가 후 반드시 단독 import 테스트: `python3 -c "from handlers._base import add_to_history; print('OK')"`  |
 | 2026-06-23 | launchctl 신뢰성 | 이 환경에서 `launchctl unload/load`는 Exit code 5로 실패 가능. 봇 재시작은 항상 Popen(start_new_session=True) — 새 프로세스 먼저 띄우고 기존 SIGTERM 순서 |
 | 2026-06-23 | botwatch 등록 | plist 파일 존재 != launchd 등록. 재부팅 후 반드시 `launchctl list com.hermes.botwatch`로 PID 확인. `-` 이면 bootstrap 재등록 필요 |
@@ -34,12 +41,21 @@ tags: []
 | 2026-06-23 | MJstock US import | screen_nongsa_danta_us.py 함수명은 `prepare_daily_us()` / `prepare_5min_us()` — `_us` 접미사 필수. `prepare_30min` 없음 → needs_30min: False 등록 필수. |
 | 2026-06-23 | subagent 권한 | 메인 세션의 Edit/Bash 권한이 subagent에 상속되지 않음. 메타 업데이트·파일 수정은 항상 메인 세션에서 직접 실행. |
 | 2026-06-23 | SRP 분할 | bio_memory_engine.py 분할 시 ImportanceScorer/ForgettingCurve 중복 정의를 제거하고 deriver_layer에서 import — Lock Stack 파일에서 가져오는 것이므로 경로/클래스명 변경 없이 유지. |
+| 2026-06-23 | pip 패키지 호환성 | `executor` 패키지가 Python 3.14에서 `cmd.async` SyntaxError — `async`는 3.5부터 예약어. 단일 import 실패가 handlers 패키지 전체(16개)를 무너뜨림. pip 패키지 추가 시 반드시 `python3 -c "import 패키지명"` 으로 3.14 호환 검증. |
+| 2026-06-23 | /restart_bot 순서 | NEW 먼저 → OLD 종료 순서는 Telegram 409 Conflict → 양쪽 사망. 반드시 OLD 즉시 종료 → sleep 1 → NEW 시작 순서. |
+| 2026-06-23 | 폴더 구조 리팩토링 | Scripts 루트 32개 + modules 83개 파일. 폴더 재구성 시 sys.path, launchd plist, 하드코딩 경로 전수 수정 필요 — 리스크 대비 이득이 적음. 보류. |
 | 2026-06-23 | Dreaming 트리거 | random.random() 기반 조기 종료는 절대 금지. 트리거 조건은 실측 가능한 값(이벤트 수, 경과 시간, 용량)으로만 결정. |
 | 2026-06-23 | hot.md 경로 | dreaming_v2.py의 _append_to_hot_md 경로는 `wiki/00_Meta/01_hot.md` — `Mjobsidian/hot.md` 루트에 쓰면 stamper 감지 안 됨. |
 | 2026-06-23 | 메타 파일명 | 메타 파일 경로 참조 시 공백 아닌 언더스코어 표준 — `02_스크립트_정보.md` (O), `02_스크립트 정보.md` (X). |
 | 2026-06-23 | MJstock KIS API | `get_exchange_code()` 단독 사용 금지. CSV 기반 `resolve_ticker_universe()` → 빈 DataFrame 시 NAS/NYS/AMS 순차 재시도 패턴이 표준. |
+| 2026-06-23 | MJstock 빈 DataFrame | KIS API는 top-n 500에서 일부 종목 빈 DataFrame 반환. `prep_daily_fn` 호출 전에도 가드 필요. 순서: fetch → 빈 가드 → prep_daily → 빈 가드 → check_fn(try/except). |
+| 2026-06-23 | pandas groupby 충돌 | `df.index.name = "date"`인 상태에서 `df["date"] = df.index...` 후 `groupby("date")` → 오류. 해결: `df.index.name = None` 먼저 클리어 후 column 추가. |
+| 2026-06-23 | 퀀트 60컬럼 | stoch_rsi는 indicators.py 함수 없음 — RSI_14 시리즈에서 인라인 계산. obv_slope_5d = polyfit(x, OBV[-5:], 1)[0]. dd_dist_pct는 samdoli 검색기만 채워짐(DD 컬럼 존재 시). |
 | 2026-06-23 | history_manager | 파일 저장 메시지 수(N)와 COMPACT_THRESHOLD(T) 관계: N/T < 0.5 유지. 현재 10/60=16.7%. 이 비율 깨지면 세션 시작 즉시 포화. |
 | 2026-06-23 | permission_bridge | 개인 봇에서 bash 자동 승인은 INTERNAL_TOOLS 분류. 단, 결제·삭제·외부 민감 API는 EXTERNAL 유지 — 이 경계선 흐리지 말 것. |
+| 2026-06-23 | 봇재시작 | /restart_bot: NEW 먼저 시작 → Conflict 양쪽 사망. OLD 먼저 종료 후 sleep 1 && NEW 순서가 정답. Telegram은 단일 인스턴스 — 두 프로세스 동시 폴링 절대 금지. |
+| 2026-06-23 | 패키지 | executor 패키지 Python 3.14 호환 불가(async 예약어 SyntaxError). _base.py 한 줄이 핸들러 16개 전체 먹통의 단일 원인. pip 패키지 추가 시 `python3 -c "import <패키지>"` 테스트 필수. executor 재설치 금지. |
+| 2026-06-23 | vault | /vault graph: Vault 노드 5000개 초과 시 graphify 기본 제한 초과 오류. `GRAPHIFY_VIZ_NODE_LIMIT=10000` 환경변수 필요. Vault 규모 커질수록 이 설정 유지 확인. |
 | 2026-06-23 | EMA 조건 구현 | 검색식 조건 부등호는 PDF 원본 그대로. `EMA_단기 > EMA_장기` = 상승배열. 헷갈리면 반드시 PDF 재확인. |
 | 2026-06-09 | 루프 아키텍처 | 루프 = 크론 + 루프 본체 의사결정자. 마법은 루프 안의 피드백. CoVe + ToolResult + Circuit Breaker = 피드백 품질 체계. |
 | 2026-06-03 | 파일 수정 | 기존 파일 수정 시 write_file(전체 덮어쓰기) 절대 금지 → Edit(patch)만. write_file = 기존 내용 소실 위험. |
@@ -47,6 +63,15 @@ tags: []
 ---
 
 ## 📌 현재 진행 중인 작업
+
+### ✅ 완료 — MJstock HTML 결과 리포터 + 텔레그램 콜백 + NASDAQ 1000 + app.py Tab 2 (2026-06-24)
+- **generate_results_html.py** (NEW): 스캔 결과 자기완결형 HTML. CDN Plotly.js 2.27.0. 시그널 상단 정렬. 종목 행 클릭 → 차트 인라인 토글. Output: `results/_html/results_{screener_key}_{date}.html`
+- **auto_scan_morning.py**: `run_screener()` 반환값 구조화. 스캔 후 HTML 자동 생성. `send_results()` + `_send_telegram_with_buttons()` 신규. 기존 차트 첨부 방식 완전 제거.
+- **handlers/_callbacks.py + _stock.py**: `mjstock_results__` prefix 콜백 라우팅. `callback_mjstock_results()` 신규 — HTML send_document 전송.
+- **mjstock_callback_bot.py** (NEW, inactive): 409 충돌로 미사용. Hermes 봇이 콜백 처리.
+- **screener/data_loader.py**: NASDAQ Screener API 전환. 시총 상위 1000개. `str(c).lower()` integer column 버그 수정.
+- **app.py Tab 2**: selectbox → checkbox 그리드(2열). `st.empty()` 진행 표시. 선택 검색기만 실행.
+- **docs/MJstock_사용설명서.html**: 새 텔레그램 포맷 + 버튼 동작 설명 추가.
 
 ### ✅ 완료 — MJstock 삼돌이/농사단타 현지화 + HTML 5종 통합 (2026-06-23)
 - **screen_samdoli_kr/us.py**: KR/US 현지화. US = 시총 $1B↑, 거래량변화 150%↑, SMA200 추가
@@ -659,7 +684,7 @@ gemma4 launchctl unload ~/Library/LaunchAgents/com.bluesea.llama_server2.plist
 - ⚠️ `meta_updater.py` 비활성화 상태 유지 중 (필요시 재활성화)
 
 
-|*최종 업데이트: 2026-06-23 22:46*
+|*최종 업데이트: 2026-06-24 11:51*
 
 ---
 

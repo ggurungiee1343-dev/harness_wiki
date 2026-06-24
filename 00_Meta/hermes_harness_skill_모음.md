@@ -1,3 +1,6 @@
+---
+tags: []
+---
 # Hermes Harness Skill 모음
 
 > 커스텀 스킬 목록 및 호출 방법 관리 문서  
@@ -260,6 +263,64 @@
 
 ---
 
+---
+
+## mattpocock/skills 접목 스킬 (2026-06-24 추가)
+
+> 출처: https://github.com/mattpocock/skills — "Skills for Real Engineers"  
+> 원본을 Hermes 환경(Python 3.14, 텔레그램 봇, L1/L2/L3 메모리)에 맞게 한국어 적용
+
+### grill-me — 작업 시작 전 요구사항 인터뷰
+
+**형태**: 지식 스킬  
+**파일**: `~/.hermes/skills/grill-me/SKILL.md`  
+**생성일**: 2026-06-24
+
+**이렇게 부르면 됩니다**
+- "grill해줘", "파고들어", "요구사항 먼저 정리하자", "grilling"
+
+**실행 시 일어나는 일**
+복잡한 구현 요청 전에 Claude가 설계 트리를 따라 질문 하나씩 — 추천 답변과 함께. 공유된 이해에 도달하면 구현 시작. 의도 불일치로 인한 재작업 방지.
+
+---
+
+### grilling — 집요한 인터뷰 루프 (grill-me의 실행 엔진)
+
+**형태**: 지식 스킬  
+**파일**: `~/.hermes/skills/grilling/SKILL.md`  
+**생성일**: 2026-06-24
+
+**이렇게 부르면 됩니다**
+- grill-me 스킬이 내부 호출 / "grilling 시작"
+
+**실행 시 일어나는 일**
+설계 트리 각 분기를 걸어 내려가며 결정 간 의존성 해소. Hermes 특화 체크리스트(Lock Stack, Python 3.14 호환, import chain) 포함.
+
+---
+
+### diagnosing-bugs — 구조화된 버그 진단 6단계 루프
+
+**형태**: 지식 스킬  
+**파일**: `~/.hermes/skills/diagnosing-bugs/SKILL.md`  
+**생성일**: 2026-06-24
+
+**이렇게 부르면 됩니다**
+- "버그 찾아줘", "왜 안되지", "diagnose", "먹통 원인", "에러 원인 파봐"
+
+**실행 시 일어나는 일**
+Phase 1(피드백 루프 구축) → Phase 2(재현+최소화) → Phase 3(가설 3~5개) → Phase 4(계측) → Phase 5(수정+회귀테스트) → Phase 6(정리+06번 보고서 기록). 피드백 루프 없이 코드 읽어서 가설 세우는 것 금지.
+
+---
+
+### claude/hermes 스킬 통합 계획 (보류 중 — 2026-06-24)
+
+- `~/.claude/skills/` 15개 중 실제 내용 있는 것: `mj-meta-update`, `mj-stock-analyze` 2개. 나머지 13개 빈 껍데기.
+- Claude Code를 쓰지 않게 되면 claude 스킬은 무용지물 → 의미 있는 스킬은 `~/.hermes/skills/`로 통합 예정.
+- **보류 항목**: `mj-meta-update` → hermes meta-update에 내용 병합 / `mj-stock-analyze` → hermes stock-analyze로 복사 / 빈 껍데기 13개 삭제.
+- MJ님 승인 후 진행.
+
+---
+
 ## 스킬 추가 방법
 
 새 스킬이 생기면 아래 형식으로 추가.
@@ -287,3 +348,6 @@
 | **Hermes 텔레그램 봇** | ✅ 자동 | skills/ 폴더 자동 로딩 |
 | **Claude Code** | ✅ 작동 | CLAUDE.md에 트리거 등록돼 있어서 세션 시작 시 인식 |
 | **다른 AI (ChatGPT 등)** | ❌ 불가 | skills/ 폴더 접근 권한 없음 |
+
+---
+*최종 업데이트: 2026-06-24 21:00*

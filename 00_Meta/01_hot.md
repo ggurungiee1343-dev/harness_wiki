@@ -10,7 +10,7 @@ tags: []
 
 # 📝 프로젝트 핫토픽
 
-**최종 업데이트: 2026-06-24 14:25*
+**최종 업데이트: 2026-06-24 22:21*
 
 ## 📠 실시간 상태 (KV — /status 명령어로 설정)
 - **Active External Project**: `/Users/bluesea/Applications/Mjstock` (자동 스캔 시스템 구축 완료)
@@ -30,6 +30,11 @@ tags: []
 
 | 날짜 | 분야 | 교훈 |
 |---|---|---|
+| 2026-06-24 | 검증층 | 압축 시 안전 규칙 증발(Governance Decay, arXiv 2606.22528). history_manager compact_and_save + get_history_for_llm 양쪽에 GOVERNANCE_ANCHOR 삽입으로 방어. 압축 후 LLM 컨텍스트 맨 앞에 Lock Stack 4개 항상 살아있어야 함. |
+| 2026-06-24 | 검증층 | 메모리 오염(Memory Contagion, arXiv 2606.23195): 편향 평가가 L2/L3 메모리 통해 누적 전파. bio_memory_engine L2 promote 시 confidence + observation_count + provenance 필드로 불확실 기억(confidence < 0.6) 격리. |
+| 2026-06-24 | 검증층 | 스킬 커버리지 측정은 weakness_miner.get_skill_coverage()로. ~/.hermes/skills + ~/.claude/skills 전체 스캔 → 호출률 반환. /status 명령어에서 미호출 스킬 목록 확인 가능. 스킬 추가 후 반드시 한 번은 실제 호출해야 coverage에 잡힘. |
+| 2026-06-24 | MJstock 차트 iframe 방식 | results HTML에서 Plotly 데이터 추출+재조립 방식은 실패 경로. 원본 chart HTML에서 4.8MB Plotly 번들만 CDN 태그로 교체(→75KB) → base64 data URI → iframe lazy load. 원본이 잘 작동하면 건드리지 말고 그대로 임베드할 것. |
+| 2026-06-24 | 4.8MB JS 인라인 HEAD | 대용량 JS를 `<head>`에 동기 인라인 번들하면 모바일 브라우저에서 onclick 바인딩 자체가 실패. bdata 변환·layout null·divId 등 세부 문제보다 이게 근본 원인이었음. JS가 4MB+ 넘으면 무조건 CDN 또는 defer. |
 | 2026-06-24 | MJstock 차트 x축 누락 | Plotly layout에서 y축 autorange만 적용하면 x축 range는 그대로 남아 히스토리가 잘림. x축도 `layout["xaxis*"].pop("range")` + `autorange=True` 세트로 처리해야 전체 히스토리 표시. y축 단독 처리 금지. |
 | 2026-06-24 | MJstock 차트 모달 vs 인라인 | 인라인 차트(행 아래 펼침)는 모바일에서 테이블 레이아웃 붕괴 + 스크롤 이탈 발생. position:fixed 전체화면 모달이 모바일/데스크탑 모두 안정적. 차트 있는 테이블은 처음부터 모달 방식으로 설계할 것. |
 | 2026-06-24 | MJstock 텔레그램 HTML | 텔레그램 원격 접속 시 로컬 IP 링크 전송 불가 → 자기완결형 HTML 파일로 `send_document` 전송이 정답. CDN Plotly.js + data만 추출하면 4.9MB → 1.4MB로 절감. |
@@ -60,11 +65,32 @@ tags: []
 | 2026-06-23 | vault | /vault graph: Vault 노드 5000개 초과 시 graphify 기본 제한 초과 오류. `GRAPHIFY_VIZ_NODE_LIMIT=10000` 환경변수 필요. Vault 규모 커질수록 이 설정 유지 확인. |
 | 2026-06-23 | EMA 조건 구현 | 검색식 조건 부등호는 PDF 원본 그대로. `EMA_단기 > EMA_장기` = 상승배열. 헷갈리면 반드시 PDF 재확인. |
 | 2026-06-09 | 루프 아키텍처 | 루프 = 크론 + 루프 본체 의사결정자. 마법은 루프 안의 피드백. CoVe + ToolResult + Circuit Breaker = 피드백 품질 체계. |
+| 2026-06-24 | 스킬 구조 | ~/.claude/skills/는 Claude Code 전용. 범용 스킬은 ~/.hermes/skills/에 두어야 AI 교체 시에도 유지됨. |
+| 2026-06-24 | 스킬 구조 | SKILL.md 다수여도 폴더 경로로 격리 — 충돌 없음. claude/hermes 각자 자기 폴더만 읽음. |
 | 2026-06-03 | 파일 수정 | 기존 파일 수정 시 write_file(전체 덮어쓰기) 절대 금지 → Edit(patch)만. write_file = 기존 내용 소실 위험. |
 
 ---
 
 ## 📌 현재 진행 중인 작업
+
+### ✅ 완료 — arXiv 6편 논문 하네스 적용 + 봇 안정화 (2026-06-24)
+
+**arXiv 논문 하네스 (6편)**:
+- `history_manager.py`: `GOVERNANCE_ANCHOR` 상수 추가 — 압축(`compact_and_save`) + 컨텍스트 조립(`get_history_for_llm`) 양쪽 적용. 압축 후 안전 규칙 59% 사라지는 문제(Governance Decay, 2606.22528) 방어.
+- `verification_engine.py`: `verify_file_changed()` / `verify_db_row_exists()` / `snapshot_file_hash()` + `detect_sycophancy_risk()` 추가 (GroundEval 2606.22737, Sycophancy 2606.20718)
+- `weakness_miner.py`: `record_skill_invocation()` / `get_skill_coverage()` / `skill_invocations` DB 테이블 + `validate_skill_safety()` 추가 (Skill Coverage 2606.20659, SkillHarness 2606.20636)
+- `bio_memory_engine.py`: L2 에피소드 `confidence` / `observation_count` / `provenance` 필드, L3 `confidence` / `success_count` 추가 (Memory Contagion 2606.23195)
+
+**봇 안정화**:
+- `handlers/_base.py`: `executor` Python 3.14 SyntaxError 제거 → `asyncio.create_subprocess_shell` 교체 (모든 명령어 먹통 근본 원인)
+- `handlers/_system_ops.py`: `/restart_bot` 레이스 컨디션 수정 — OLD 먼저 SIGTERM, 1초 후 NEW 시작
+- `handlers/_vault.py`: `/vault graph` 노드 오버플로우 graceful degradation
+
+**신규 스킬**: `grill-me`, `grilling`, `diagnosing-bugs` (3개, `~/.hermes/skills/`)
+
+### ✅ 완료 — MJstock results HTML 차트 iframe 방식 전환 (2026-06-24)
+- **generate_results_html.py**: Plotly 데이터 추출+JS 재렌더링 방식 폐기 → `_load_chart_iframe()` 신규. 원본 chart HTML에서 4.8MB Plotly 번들 → CDN 태그 교체(75KB) → base64 data URI → `<iframe data-src="...">` lazy load. 파일 크기 6MB → 1.8MB. `toggleChart()`도 iframe.src 설정으로 단순화.
+- **docs/MJstock_사용설명서.html**: "4. 차트 보는 법" 섹션 — iframe 방식 설명 + 재발방지 warn 박스 추가.
 
 ### ✅ 완료 — MJstock 차트 전체화면 모달 전환 + position_monitor_guide 이동 (2026-06-24)
 - **generate_results_html.py**: 차트 인라인 토글 → 전체화면 모달(position:fixed). `#modal-toolbar` + ESC 닫기. x축 range 누락 버그 수정(`xaxis*` autorange). height 반응형(`calc(100vh - 56px)`). Plotly responsive+scrollZoom 추가.
@@ -691,7 +717,7 @@ gemma4 launchctl unload ~/Library/LaunchAgents/com.bluesea.llama_server2.plist
 - ⚠️ `meta_updater.py` 비활성화 상태 유지 중 (필요시 재활성화)
 
 
-|*최종 업데이트: 2026-06-24 14:25*
+|*최종 업데이트: 2026-06-24 22:21*
 
 ---
 

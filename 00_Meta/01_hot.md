@@ -10,7 +10,7 @@ tags: []
 
 # 📝 프로젝트 핫토픽
 
-**최종 업데이트: 2026-06-24 11:51*
+**최종 업데이트: 2026-06-24 14:25*
 
 ## 📠 실시간 상태 (KV — /status 명령어로 설정)
 - **Active External Project**: `/Users/bluesea/Applications/Mjstock` (자동 스캔 시스템 구축 완료)
@@ -30,6 +30,8 @@ tags: []
 
 | 날짜 | 분야 | 교훈 |
 |---|---|---|
+| 2026-06-24 | MJstock 차트 x축 누락 | Plotly layout에서 y축 autorange만 적용하면 x축 range는 그대로 남아 히스토리가 잘림. x축도 `layout["xaxis*"].pop("range")` + `autorange=True` 세트로 처리해야 전체 히스토리 표시. y축 단독 처리 금지. |
+| 2026-06-24 | MJstock 차트 모달 vs 인라인 | 인라인 차트(행 아래 펼침)는 모바일에서 테이블 레이아웃 붕괴 + 스크롤 이탈 발생. position:fixed 전체화면 모달이 모바일/데스크탑 모두 안정적. 차트 있는 테이블은 처음부터 모달 방식으로 설계할 것. |
 | 2026-06-24 | MJstock 텔레그램 HTML | 텔레그램 원격 접속 시 로컬 IP 링크 전송 불가 → 자기완결형 HTML 파일로 `send_document` 전송이 정답. CDN Plotly.js + data만 추출하면 4.9MB → 1.4MB로 절감. |
 | 2026-06-24 | MJstock 콜백 봇 | 두 봇이 같은 토큰으로 getUpdates 폴링 → 409 Conflict → 양쪽 사망. 독립 콜백 봇 대신 기존 Hermes 봇에 콜백 핸들러(`mjstock_results__` prefix) 추가하는 방식이 정답. |
 | 2026-06-24 | NASDAQ API | NASDAQ Screener API `marketCap` 필드는 T/B/M suffix 없는 순수 달러 숫자 문자열. `_parse_cap()`에서 suffix 처리 로직 불필요. |
@@ -63,6 +65,11 @@ tags: []
 ---
 
 ## 📌 현재 진행 중인 작업
+
+### ✅ 완료 — MJstock 차트 전체화면 모달 전환 + position_monitor_guide 이동 (2026-06-24)
+- **generate_results_html.py**: 차트 인라인 토글 → 전체화면 모달(position:fixed). `#modal-toolbar` + ESC 닫기. x축 range 누락 버그 수정(`xaxis*` autorange). height 반응형(`calc(100vh - 56px)`). Plotly responsive+scrollZoom 추가.
+- **sellstock/position_monitor_guide.html** (이동): `docs/` → `sellstock/`. /mjbuy, /mjsell, /mjpositions 상세 문서 + 퀀트 매도 시그널 논리 추가 (v2.0).
+- **docs/MJstock_사용설명서.html**: 차트 사용법 설명 모달 방식으로 업데이트.
 
 ### ✅ 완료 — MJstock HTML 결과 리포터 + 텔레그램 콜백 + NASDAQ 1000 + app.py Tab 2 (2026-06-24)
 - **generate_results_html.py** (NEW): 스캔 결과 자기완결형 HTML. CDN Plotly.js 2.27.0. 시그널 상단 정렬. 종목 행 클릭 → 차트 인라인 토글. Output: `results/_html/results_{screener_key}_{date}.html`
@@ -684,7 +691,7 @@ gemma4 launchctl unload ~/Library/LaunchAgents/com.bluesea.llama_server2.plist
 - ⚠️ `meta_updater.py` 비활성화 상태 유지 중 (필요시 재활성화)
 
 
-|*최종 업데이트: 2026-06-24 11:51*
+|*최종 업데이트: 2026-06-24 14:25*
 
 ---
 

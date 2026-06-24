@@ -178,4 +178,4 @@ tags: []
 *연관: `claude_briefing.md`, `constitution.local.md`, `guardrails.md`, `USER.md`*
 
 ---
-*최종 업데이트: 2026-06-23 22:47*
+*최종 업데이트: 2026-06-23 23:50*

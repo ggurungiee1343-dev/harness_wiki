@@ -1,5 +1,8 @@
+---
+tags: []
+---
 # Hermes Claude Briefing
-생성일시: 2026-06-23 20:16
+생성일시: 2026-06-24 22:13
 버전: Hermes v9.2
 
 ---
@@ -10,31 +13,31 @@
 - **01_hot.md** — 세션 시작 시 자동 스캔
 
 ## 🖥️ 현재 시스템 상태
-#### 변경 내용
+| `screener/screen_nongsa_danta_kr.py` | 농사단타 KR — 삼돌이 후보 대상, 50억봉◆+3매수신호+OBV 3박자, Phase 7단계 |
+| `screener/screen_nongsa_danta_us.py` | 농사단타 US — US 현지화, 30분봉 미사용(needs_30min=False), $5M봉 기준 |
 
-| 파일 | 변경 내용 |
+#### run_scan.py 등록
+
+| 레지스트리 | 추가 항목 |
 |---|---|
-| `app.py` | SCREENERS_KR dict 키 6개 `kr_X` → `X_kr` 형식으로 통일 (치명적) |
-| `run_scan.py` | `run_one()` 함수에 `no_telegram: bool = False` 파라미터 추가, `args.no_telegram` NameError 수정 (치명적) |
-| crontab | 07:30/17:30/18:00 작업 3개 `/usr/bin/python3` → `.venv/bin/python` 교체 (치명적) |
-| `auto_scan_nasdaq500.py` | `sys.executable` → `PYTHON` 변수 (venv 우선, 없으면 sys.executable fallback) |
-| `app.py:617` | `st.switch_tab("📊 차트 보기")` 제거 → 안내 메시지로 대체 (Streamlit 1.58 미지원) |
-| `send_scan_result.py:52` | `load_latest_csv` 반환 타입 `pd.DataFrame | None` → `tuple | None` |
+| `KR_SCREENERS` | `samdoli_kr` (needs_30min: True), `nongsa_danta_kr` (needs_30min: True) |
+| `US_SCREENERS` | `samdoli` (needs_30min: True), `nongsa_danta` (needs_30min: False) |
 
-#### 버그 요약
+**검증**: `python3 -c "from screen_samdoli_kr...; from screen_nongsa_danta_us...; print('성공')"` → 4개 임포트 성공 확인
 
-| 번호 | 심각도 | 파일 | 증상 |
-|---|---|---|---|
-| BUG-1 | 치명적 | `app.py` | KR 검색식 키 불일치 → KR 스캔 argparse 검증 실패, 결과 폴더 미존재 경로 참조 |
-| BUG-2 | 치명적 | `run_scan.py` | `run_one()`에서 `args` NameError — `args.no_telegram` 미전달 |
-| BUG-3 | 치명적 | crontab | venv 미사용 → pandas/dotenv/requests/plotly import 실패 |
-| BUG-4 | 경미 | `app.py` | `st.switch_tab` Streamlit 1.58 미지원 API 호출 오류 |
-| BUG-5 | 경미 | `send_scan_result.py` | 반환 타입힌트 오류 (`DataFrame` → `tuple`) |
+#### HTML 문서 정리 (8개 → 5개)
+
+| 변경 | 파일 |
+|---|---|
+| 내용 흡수 후 삭제 | `samdoli_guide.html`, `nongsa_danta_guide.html`, `nongsa_signal_board.html` |
+| 삼돌이/농사단타 섹션 추가 | `MJstock_사용설명서.html` (섹션3 카드, 타이밍표, 파라미터표, 선택가이드) |
+| 삼돌이/농사단타 섹션 추가 | `signals_entry_points.html` (섹션13 Phase 가이드, 타점표) |
+| 삼돌이KR/농사단타KR 수식 추가 | `korean_original_formulas.html` (S9/S10) |
+| 삼돌이US/농사단타US 변환표 추가 | `kr_to_us_conversion.html` (S8/S9) |
 
 **에러 진단 포인트**:
-- KR 스캔 argparse error → SCREENERS_KR 키 형식 확인 (`X_kr` 패턴)
-- `run_one()` NameError → 호출부 3곳에 `no_telegram=args.no_telegram` 전달 여부 확인
-- crontab 스캔 실패 시 `which python` → `.venv/bin/python` 확인
+- `nongsa_danta_us` import 시 `prepare_30min` 없음 주의 → `needs_30min: False` 유지
+- 함수명 차이: US 버전은 `prepare_daily_us()`, `prepare_5min_us()` (KR과 달리 `_us` 접미사)
 
 ## 🚨 미해결 버그/장애
 ## 🔴 결함 #1: Zombie Poller (PTB run_polling 블로킹)
@@ -93,3 +96,6 @@ memory.md (핵심 기억) ← L2: episodic_memory.json ~~— memory.md는 Dreami
 ---
 *이 파일은 /claude_brief 명령어로 자동 생성됩니다.*
 *Claude 새 대화 시작 시 이 파일을 첨부하세요.*
+
+---
+*최종 업데이트: 2026-06-24 22:13*

@@ -10,7 +10,7 @@ tags: []
 
 # 📝 프로젝트 핫토픽
 
-**최종 업데이트: 2026-06-24 22:21*
+**최종 업데이트: 2026-06-24 22:39*
 
 ## 📠 실시간 상태 (KV — /status 명령어로 설정)
 - **Active External Project**: `/Users/bluesea/Applications/Mjstock` (자동 스캔 시스템 구축 완료)
@@ -65,13 +65,19 @@ tags: []
 | 2026-06-23 | vault | /vault graph: Vault 노드 5000개 초과 시 graphify 기본 제한 초과 오류. `GRAPHIFY_VIZ_NODE_LIMIT=10000` 환경변수 필요. Vault 규모 커질수록 이 설정 유지 확인. |
 | 2026-06-23 | EMA 조건 구현 | 검색식 조건 부등호는 PDF 원본 그대로. `EMA_단기 > EMA_장기` = 상승배열. 헷갈리면 반드시 PDF 재확인. |
 | 2026-06-09 | 루프 아키텍처 | 루프 = 크론 + 루프 본체 의사결정자. 마법은 루프 안의 피드백. CoVe + ToolResult + Circuit Breaker = 피드백 품질 체계. |
-| 2026-06-24 | 스킬 구조 | ~/.claude/skills/는 Claude Code 전용. 범용 스킬은 ~/.hermes/skills/에 두어야 AI 교체 시에도 유지됨. |
-| 2026-06-24 | 스킬 구조 | SKILL.md 다수여도 폴더 경로로 격리 — 충돌 없음. claude/hermes 각자 자기 폴더만 읽음. |
+| 2026-06-24 | 스킬 구조 | ~/.claude/skills/는 Claude Code 전용. 범용 스킬은 ~/.hermes/skills/에 두어야 AI 교체 시에도 유지됨. → 일원화 완료. |
+| 2026-06-24 | 스킬 병합 | 같은 역할 스킬 2개 존재 시 더 완성된 쪽을 살리고 구버전만 삭제. mj-meta-update vs meta-update 비교 → hermes 쪽이 5단계 절차 완비 → hermes 유지, claude 버전 삭제. |
 | 2026-06-03 | 파일 수정 | 기존 파일 수정 시 write_file(전체 덮어쓰기) 절대 금지 → Edit(patch)만. write_file = 기존 내용 소실 위험. |
 
 ---
 
 ## 📌 현재 진행 중인 작업
+
+### ✅ 완료 — Claude Code 스킬 정리 + ~/.hermes/skills/ 일원화 (2026-06-24)
+- `~/.claude/skills/` 15개 전체 삭제 (13개 빈 껍데기 + mj-meta-update 구버전 + mj-stock-analyze)
+- `mj-stock-analyze` → `~/.hermes/skills/mj-stock-analyze/`로 이전
+- `mj-meta-update` → hermes `meta-update/`가 더 완성본 → 구버전만 삭제
+- `hermes_harness_skill_모음.md` 통합 완료 상태로 갱신
 
 ### ✅ 완료 — arXiv 6편 논문 하네스 적용 + 봇 안정화 (2026-06-24)
 
@@ -717,7 +723,7 @@ gemma4 launchctl unload ~/Library/LaunchAgents/com.bluesea.llama_server2.plist
 - ⚠️ `meta_updater.py` 비활성화 상태 유지 중 (필요시 재활성화)
 
 
-|*최종 업데이트: 2026-06-24 22:21*
+|*최종 업데이트: 2026-06-24 22:39*
 
 ---
 

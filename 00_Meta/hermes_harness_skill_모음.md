@@ -58,33 +58,11 @@ tags: []
 | `00_Meta_지도.md` | 신규 문서 생성 |
 | `claude_briefing.md` | 시스템 구조 대규모 변경 |
 
-### 2. mj-meta-update — Claude Code 메타 업데이트 스킬
+### 2. mj-stock-analyze — V_FINAL 주식 분석 체크리스트
 
-**형태**: Claude Code 스킬  
-**파일**: `~/.claude/skills/mj-meta-update/SKILL.md`  
-**생성일**: 2026-06-10
-
-**이렇게 부르면 됩니다** (Claude Code 세션에서)
-- "메타 업데이트해줘" (Hermes skill과 동일 트리거, Claude Code에서도 작동)
-- "작업 내용 저장해줘"
-- "문서 업데이트해줘"
-
-**실행 시 일어나는 일**
-1. 이 세션의 변경 파일 분석
-2. 변경 유형에 따라 메타 7종 선택적 업데이트
-3. `git -C wiki add -A && git commit` 자동 실행
-
-**Hermes skill과의 차이**
-- Hermes skill (`meta-update`): 텔레그램에서 호출 → Hermes 봇이 처리
-- Claude Code skill (`mj-meta-update`): Claude Code 세션에서 호출 → Claude가 직접 파일 편집
-
----
-
-### 3. mj-stock-analyze — V_FINAL 주식 분석 체크리스트
-
-**형태**: Claude Code 스킬  
-**파일**: `~/.claude/skills/mj-stock-analyze/SKILL.md`  
-**생성일**: 2026-06-10
+**형태**: Hermes 스킬 (2026-06-24 ~/.claude/skills/ → ~/.hermes/skills/ 통합 완료)  
+**파일**: `~/.hermes/skills/mj-stock-analyze/SKILL.md`  
+**생성일**: 2026-06-10 / **통합일**: 2026-06-24
 
 **이렇게 부르면 됩니다** (Claude Code 세션에서)
 - "NVDA 분석해줘"
@@ -312,12 +290,13 @@ Phase 1(피드백 루프 구축) → Phase 2(재현+최소화) → Phase 3(가�
 
 ---
 
-### claude/hermes 스킬 통합 계획 (보류 중 — 2026-06-24)
+### claude/hermes 스킬 통합 완료 (2026-06-24)
 
-- `~/.claude/skills/` 15개 중 실제 내용 있는 것: `mj-meta-update`, `mj-stock-analyze` 2개. 나머지 13개 빈 껍데기.
-- Claude Code를 쓰지 않게 되면 claude 스킬은 무용지물 → 의미 있는 스킬은 `~/.hermes/skills/`로 통합 예정.
-- **보류 항목**: `mj-meta-update` → hermes meta-update에 내용 병합 / `mj-stock-analyze` → hermes stock-analyze로 복사 / 빈 껍데기 13개 삭제.
-- MJ님 승인 후 진행.
+- `~/.claude/skills/` 15개 전체 삭제 완료.
+  - 13개 빈 껍데기 (adr, brief, collab-audit, freeze, harness-init, pre-push, project-check, project-init, retro, session-checkpoint, session-start, team-init, token-audit) → 삭제
+  - `mj-meta-update` → `~/.hermes/skills/meta-update/`가 더 완성도 높아 통합, 구버전 삭제
+  - `mj-stock-analyze` → `~/.hermes/skills/mj-stock-analyze/`로 복사 후 원본 삭제
+- `~/.claude/skills/` 디렉토리는 현재 비어 있음. 스킬은 모두 `~/.hermes/skills/`로 일원화.
 
 ---
 
@@ -341,6 +320,128 @@ Phase 1(피드백 루프 구축) → Phase 2(재현+최소화) → Phase 3(가�
 
 ---
 
+## arXiv 논문 기반 하네스 방어층 (2026-06-24 구현)
+
+> 6편의 AI 안전성 논문을 Hermes 하네스에 직접 적용한 내부 방어 시스템.  
+> 사용자가 명시적으로 부르지 않아도 **자동으로 작동**하는 백그라운드 레이어.
+
+### A. GOVERNANCE_ANCHOR — 압축 후 규칙 붕괴 방지
+
+**논문**: arXiv 2606.22528 (Governance Decay)  
+**파일**: `Scripts/modules/history_manager.py`  
+**역할**: 대화 압축 시 Lock Stack·경로 규칙 등 핵심 제약이 59%까지 사라지는 현상 방지
+
+**작동 방식**: Hermes LLM 히스토리 압축 시 + LLM 전달 시 → 9개 규칙 블록을 컨텍스트 맨 앞에 항상 삽입  
+포함 규칙: Lock Stack 4파일 수정 금지 / 경로 규칙 / 증거 기반 / **반아첨 규칙 6~9번**
+
+**확인 방법**
+```bash
+python3 -c "from modules.history_manager import GOVERNANCE_ANCHOR; print(GOVERNANCE_ANCHOR)"
+```
+
+---
+
+### B. validate_skill_safety() — 안전 제약 없는 스킬 탐지
+
+**논문**: arXiv 2606.20636 (SkillHarness)  
+**파일**: `Scripts/modules/weakness_miner.py`  
+**역할**: SKILL.md에 위험/금지/제한 키워드가 없는 스킬 목록 반환 → 안전하지 않은 스킬 배포 57.1% 감소
+
+**사용 방법** (Claude Code에서)
+```python
+from modules.weakness_miner import get_weakness_miner
+print(get_weakness_miner().validate_skill_safety())
+# {'total': 12, 'safe': 9, 'unsafe_skills': [{'name': 'grill-me', 'missing': '안전 제약 키워드 없음'}]}
+```
+
+**안전 판단 키워드**: `금지`, `위험`, `제한`, `forbidden`, `unsafe`, `lock stack`, `do not`, `주의`, `경고`, `warning`, `caution`
+
+---
+
+### C. get_skill_coverage() — 실제 호출된 스킬 비율 측정
+
+**논문**: arXiv 2606.20659 (Skill Coverage)  
+**파일**: `Scripts/modules/weakness_miner.py`  
+**역할**: 등록된 스킬 중 한 번이라도 호출된 비율 추적 → "만들어만 놓고 안 쓰는 스킬" 탐지
+
+**사용 방법**
+```python
+from modules.weakness_miner import get_weakness_miner
+cov = get_weakness_miner().get_skill_coverage()
+# {'total': 15, 'covered': 6, 'never_called': ['grill-me', ...], 'ratio': 0.4}
+```
+
+**텔레그램 `/status`에서 확인**: ✅ 70%↑ / ⚠️ 40~70% / 🔴 40%↓
+
+**스킬 호출 기록 방법** (핸들러에서 호출 시 등록)
+```python
+get_weakness_miner().record_skill_invocation("meta-update")
+```
+
+---
+
+### D. detect_sycophancy_risk() — 아첨 패턴 탐지
+
+**논문**: arXiv 2606.20718 (Sycophancy)  
+**파일**: `~/.hermes/governance/skills/brain/cognitive/scripts/verification_engine.py`  
+**역할**: LLM 응답의 아첨 패턴 4가지 감지 — 근거 없는 입장 번복, 과도한 동의, 수치 상향 조정, 부정 정보 억제
+
+**탐지 패턴**
+
+| 패턴 | 설명 | 점수 |
+|---|---|---|
+| 입장번복_의심 | 사과 후 이전 답변과 반대 내용 제시 | +0.4 |
+| 과도한동의 | "물론/당연/맞습니다" 3회↑ | +0.3 |
+| 수치상향_의심 | 사용자 불만 후 수치가 10%↑ | +0.3 |
+| 부정정보_억제 | 200자↑ 응답에 긍정만, 단점·위험 없음 | +0.2 |
+
+**사용 방법** (0.5↑이면 risk=True)
+```python
+from verification_engine import VerificationEngine
+result = VerificationEngine().detect_sycophancy_risk(
+    response="물론이죠! 당연히 맞습니다...",
+    prior_response="이 방법은 위험합니다.",
+    user_msg="아니 괜찮다고"
+)
+# {'risk': True, 'score': 0.7, 'patterns': ['입장번복_의심', '과도한동의(3회)']}
+```
+
+---
+
+### E. verify_file_changed() / verify_db_row_exists() — 프로세스 검증
+
+**논문**: arXiv 2606.22737 (GroundEval)  
+**파일**: `~/.hermes/governance/skills/brain/cognitive/scripts/verification_engine.py`  
+**역할**: "완료했다" 보고 ≠ 실제 변경됨. LLM-as-Judge 대신 결정론적 검증으로 분리.
+
+**사용 방법**
+```python
+from verification_engine import VerificationEngine
+ve = VerificationEngine()
+hash_before = VerificationEngine.snapshot_file_hash("/path/to/file.py")
+# ... 수정 ...
+result = ve.verify_file_changed("/path/to/file.py", hash_before)
+# {'changed': True, 'hash_before': 'abc123', 'hash_after': 'def456'}
+
+# DB 레코드 실제 존재 확인
+result = ve.verify_db_row_exists("~/.hermes/runtime/weakness.db", "failure_log", "42")
+# {'exists': True}
+```
+
+---
+
+### F. L2/L3 Memory Confidence — 불확실한 기억 격리
+
+**논문**: arXiv 2606.23195 (Memory Contagion)  
+**파일**: `Scripts/modules/bio_memory_engine.py`  
+**역할**: 잘못된 기억이 평가 판단에 스며드는 현상 방지. L2 에피소드·L3 절차 기억에 신뢰도 점수 자동 부여.
+
+**confidence 점수**: 0.8↑ 직접 관찰 / 0.5~0.8 추론 포함 / 0.2~0.5 교차 검증 필요 / 0.2↓ 격리 대상
+
+저장 시 자동으로 `confidence`, `observation_count`, `provenance`(출처 메시지 ID) 필드 포함.
+
+---
+
 ## 트리거 작동 범위
 
 | 환경 | 작동 여부 | 방식 |
@@ -350,4 +451,4 @@ Phase 1(피드백 루프 구축) → Phase 2(재현+최소화) → Phase 3(가�
 | **다른 AI (ChatGPT 등)** | ❌ 불가 | skills/ 폴더 접근 권한 없음 |
 
 ---
-*최종 업데이트: 2026-06-24 21:00*
+*최종 업데이트: 2026-06-24 22:38*

@@ -10,7 +10,7 @@ tags: []
 
 # 📝 프로젝트 핫토픽
 
-**최종 업데이트: 2026-06-24 22:41*
+**최종 업데이트: 2026-06-28 04:40*
 
 ## 📠 실시간 상태 (KV — /status 명령어로 설정)
 - **Active External Project**: `/Users/bluesea/Applications/Mjstock` (자동 스캔 시스템 구축 완료)
@@ -30,6 +30,12 @@ tags: []
 
 | 날짜 | 분야 | 교훈 |
 |---|---|---|
+| 2026-06-28 | Telegram | PTB 봇이 active일 때 curl getUpdates 직접 호출 → 409 Conflict 발생. 진단 목적이라도 절대 금지. 진단은 `launchctl print` + `pgrep` 로만. |
+| 2026-06-28 | NVIDIA API | GPT OSS 120B는 reasoning model — max_tokens≥2048 필수. content=None이면 `choices[0].message.reasoning_content` fallback 시도. max_tokens=100 설정은 응답 생성 불가. |
+| 2026-06-28 | signal_tracker | star_signal_date는 BUY_SIGNALS 8종(BUY_URYANGJU/BUY_SELYEOK/NONGSSA/RAPID_ACCUM/GONGJOONG/NAKPOK/REVERSAL_EARLY/MACD_BB_BUY) 기준. SCAN_PASS는 ★ 아님. |
+| 2026-06-28 | signal_tracker | exit_price는 price_map에 없음(탈락 종목이므로) → 마지막 기록된 close_price 사용. price_map 조회 실패를 기본 동작으로 처리하면 안 됨. |
+| 2026-06-28 | JSON 파싱 | signal_tracker가 stdout에 [Tracker] 라인 출력 → json.loads 전 `next((l for l in lines if l.strip().startswith('{')), '')` 패턴 필수. stdout에 로그 섞이는 모든 subprocess 호출에 동일 적용. |
+| 2026-06-28 | Hermes1 토큰 | TELEGRAM_BOT_TOKEN 공유 → Hermes1/Hermes2/screener 모두 같은 토큰으로 getUpdates → Conflict. 봇별 토큰 분리(HERMES1_BOT_TOKEN) 필수. |
 | 2026-06-24 | Hermes1 봇 재시작 (BOT-001) | 봇 "자주 뻑감"의 근본 원인 = **재시작 이중화**. botwatch의 nohup 폴백이 launchd 바깥 유령 프로세스 생성 → KeepAlive가 또 하나 띄움 → 두 봇이 getUpdates Conflict로 상호 사망. 봇 재시작은 **반드시 launchd 경로**(`launchctl enable` → `kickstart -k`)로만. 수동 nohup 금지. 진단: `pgrep -f "Scripts/hermes_local.py" \| wc -l`(=1이어야 정상), `launchctl print gui/$(id -u)/com.hermes.bot \| grep state`. 구버전 `com.bluesea.hermes_local.plist.disabled`(~/hermes/ 경로) 절대 enable 금지. 상세: 06번 BOT-001. |
 | 2026-06-24 | 검증층 | 압축 시 안전 규칙 증발(Governance Decay, arXiv 2606.22528). history_manager compact_and_save + get_history_for_llm 양쪽에 GOVERNANCE_ANCHOR 삽입으로 방어. 압축 후 LLM 컨텍스트 맨 앞에 Lock Stack 4개 항상 살아있어야 함. |
 | 2026-06-24 | 검증층 | 메모리 오염(Memory Contagion, arXiv 2606.23195): 편향 평가가 L2/L3 메모리 통해 누적 전파. bio_memory_engine L2 promote 시 confidence + observation_count + provenance 필드로 불확실 기억(confidence < 0.6) 격리. |
@@ -73,6 +79,15 @@ tags: []
 ---
 
 ## 📌 현재 진행 중인 작업
+
+### ✅ 완료 — MJstock 주식봇 AI 채팅 + quant CSV 저장 + signal_tracker 개선 (2026-06-28)
+- Hermes1 HERMES1_BOT_TOKEN 분리 → getUpdates Conflict 해결
+- Hermes2 API minimax-m2.7 → openai/gpt-oss-120b 전환
+- hermes_stock_bot.py AI 채팅 기능(`_call_gpt_oss`, `_history`, `handle_text`) 추가
+- signal_tracker.py BUY_SIGNALS/SELL_SIGNALS 상수, star_signal_date/circle_date/exited 로직 개선
+- scan_all_ticker.py + run_scan.py quant CSV 저장 연동
+- tracker/signal_log.csv 신규 생성
+- **⚠️ 후속 과제**: `docs/quant_logic_analysis.html` 업데이트 필요 (star_signal_date/circle_date/return_30d 반영)
 
 ### ✅ 완료 — Claude Code 스킬 정리 + ~/.hermes/skills/ 일원화 (2026-06-24)
 - `~/.claude/skills/` 15개 전체 삭제 (13개 빈 껍데기 + mj-meta-update 구버전 + mj-stock-analyze)
@@ -724,7 +739,7 @@ gemma4 launchctl unload ~/Library/LaunchAgents/com.bluesea.llama_server2.plist
 - ⚠️ `meta_updater.py` 비활성화 상태 유지 중 (필요시 재활성화)
 
 
-|*최종 업데이트: 2026-06-24 22:41*
+|*최종 업데이트: 2026-06-28 04:40*
 
 ---
 

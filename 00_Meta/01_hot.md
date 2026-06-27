@@ -10,7 +10,7 @@ tags: []
 
 # 📝 프로젝트 핫토픽
 
-**최종 업데이트: 2026-06-28 04:40*
+**최종 업데이트: 2026-06-28 08:44*
 
 ## 📠 실시간 상태 (KV — /status 명령어로 설정)
 - **Active External Project**: `/Users/bluesea/Applications/Mjstock` (자동 스캔 시스템 구축 완료)
@@ -30,6 +30,9 @@ tags: []
 
 | 날짜 | 분야 | 교훈 |
 |---|---|---|
+| 2026-06-28 | MJstock 데이터 | KIS API 해외 일봉 최대 100봉 제한 — judoju(210봉), chowuryang(420봉) 필요 검색기는 KIS 단독으로는 영구 0개. yfinance 병용(500봉) 필수. |
+| 2026-06-28 | MJstock selyeok | selyeok은 prepare_daily + df_weekly 둘 다 필요. 하나라도 빠지면 RVOL/BB=NaN 또는 F조건 항상 False → 결과 0개. run_scan.py 추가 시 두 인수 세트 확인 필수. |
+| 2026-06-28 | MJstock 유니버스 | S&P600(소형주)은 russell2000.csv로 관리. Wikipedia 자동 수집(_update_russell2000). 대형주 universe와 별개로 auto_scan_morning.py에서 별도 selyeok 실행 블록 유지. |
 | 2026-06-28 | Telegram | PTB 봇이 active일 때 curl getUpdates 직접 호출 → 409 Conflict 발생. 진단 목적이라도 절대 금지. 진단은 `launchctl print` + `pgrep` 로만. |
 | 2026-06-28 | NVIDIA API | GPT OSS 120B는 reasoning model — max_tokens≥2048 필수. content=None이면 `choices[0].message.reasoning_content` fallback 시도. max_tokens=100 설정은 응답 생성 불가. |
 | 2026-06-28 | signal_tracker | star_signal_date는 BUY_SIGNALS 8종(BUY_URYANGJU/BUY_SELYEOK/NONGSSA/RAPID_ACCUM/GONGJOONG/NAKPOK/REVERSAL_EARLY/MACD_BB_BUY) 기준. SCAN_PASS는 ★ 아님. |
@@ -739,7 +742,7 @@ gemma4 launchctl unload ~/Library/LaunchAgents/com.bluesea.llama_server2.plist
 - ⚠️ `meta_updater.py` 비활성화 상태 유지 중 (필요시 재활성화)
 
 
-|*최종 업데이트: 2026-06-28 04:40*
+|*최종 업데이트: 2026-06-28 08:44*
 
 ---
 

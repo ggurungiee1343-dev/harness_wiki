@@ -10,7 +10,7 @@ tags: []
 
 # 📝 프로젝트 핫토픽
 
-**최종 업데이트: 2026-06-28 08:44*
+**최종 업데이트: 2026-06-28 21:20*
 
 ## 📠 실시간 상태 (KV — /status 명령어로 설정)
 - **Active External Project**: `/Users/bluesea/Applications/Mjstock` (자동 스캔 시스템 구축 완료)
@@ -30,6 +30,12 @@ tags: []
 
 | 날짜 | 분야 | 교훈 |
 |---|---|---|
+| 2026-06-28 | MJcoin 명령어 | /coin scan → /coin all 리네임. "all"이 전체 스캔 의미로 더 직관적. 기존 scan도 호환 유지(sub in 조건). HELP_TEXT + 사용설명서 HTML도 함께 교체해야 일관성 유지. |
+| 2026-06-28 | MJcoin 텔레그램 콜백 | callback_coin 핸들러 미등록이 /coin 명령 전체 무응답의 단일 원인. 신규 봇 모듈 추가 시 hermes_stock_bot.py CallbackQueryHandler 등록까지 세트로 확인. |
+| 2026-06-28 | MJcoin 보조지표 | 검색기 prep_fn은 자기 검색기 지표만 계산. 차트 핸들러에서 여러 검색기 결과 합산하면 지표 누락 → "—". 차트 핸들러는 항상 직접 계산. |
+| 2026-06-28 | Plotly showlegend | grep 으로 `"showlegend": true`(공백 포함) 검색 시 0 결과 — Plotly JSON은 공백 없이 `"showlegend":true` 출력. 공백 없이 검색해야 정확함. |
+| 2026-06-28 | MJstock KR 데이터 | KIS API 국내 일봉도 100봉 제한 — `.KS`/`.KQ` yfinance 우선 필수. 삼성전자 300봉, 에코프로 485봉 실측. get_domestic_daily_ohlcv() 수정 완료. |
+| 2026-06-28 | MJcoin | 코인 스크리너 indicators.py 공유 재사용(sys.path). 스테이블코인 필터(`_STABLECOINS` 셋) 없으면 USDT/USDC/USD1 등 다수 통과 오탐. |
 | 2026-06-28 | MJstock 데이터 | KIS API 해외 일봉 최대 100봉 제한 — judoju(210봉), chowuryang(420봉) 필요 검색기는 KIS 단독으로는 영구 0개. yfinance 병용(500봉) 필수. |
 | 2026-06-28 | MJstock selyeok | selyeok은 prepare_daily + df_weekly 둘 다 필요. 하나라도 빠지면 RVOL/BB=NaN 또는 F조건 항상 False → 결과 0개. run_scan.py 추가 시 두 인수 세트 확인 필수. |
 | 2026-06-28 | MJstock 유니버스 | S&P600(소형주)은 russell2000.csv로 관리. Wikipedia 자동 수집(_update_russell2000). 대형주 universe와 별개로 auto_scan_morning.py에서 별도 selyeok 실행 블록 유지. |
@@ -742,7 +748,7 @@ gemma4 launchctl unload ~/Library/LaunchAgents/com.bluesea.llama_server2.plist
 - ⚠️ `meta_updater.py` 비활성화 상태 유지 중 (필요시 재활성화)
 
 
-|*최종 업데이트: 2026-06-28 08:44*
+|*최종 업데이트: 2026-06-28 21:20*
 
 ---
 

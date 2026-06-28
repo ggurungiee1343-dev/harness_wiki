@@ -10,7 +10,7 @@ tags: []
 
 # 📝 프로젝트 핫토픽
 
-**최종 업데이트: 2026-06-28 21:20*
+**최종 업데이트: 2026-06-28 23:02*
 
 ## 📠 실시간 상태 (KV — /status 명령어로 설정)
 - **Active External Project**: `/Users/bluesea/Applications/Mjstock` (자동 스캔 시스템 구축 완료)
@@ -30,6 +30,10 @@ tags: []
 
 | 날짜 | 분야 | 교훈 |
 |---|---|---|
+| 2026-06-28 | MJcoin signal_tracker_coin 고도화 | score_delta는 직전 스캔 기록 없으면 항상 0 — 첫 실행 정상. ATR 포지션 사이징: stop=ATR×3, 계좌 1% 리스크 기준. star_type/circle_type은 BUY_SIGNALS 리스트 기반 자동 추출 — 리스트 누락 시 빈 칸. |
+| 2026-06-28 | MJstock chart.py 분석카드 | `_inject_analysis_card()`는 save 함수 끝에서 HTML에 카드 삽입. 세 save 함수(save_chart/save_farming_chart/save_chowuryang_chart) 모두에 추가해야 일관성 유지. 하나라도 누락 시 해당 검색기 차트에만 카드 미표시. |
+| 2026-06-28 | MJcoin signal_tracker | 코인 tracker CSV는 `Coin/tracker/signal_log.csv`. `batch_fill_returns_coin.py`가 루트만 탐색하는 버그 → `_collect_csv_files()` 재귀 탐색으로 수정. 서브폴더 samdoli/uryangju 등 모두 커버. |
+| 2026-06-28 | MJcoin vs MJstock 격차 | 코인에 없는 것: score_delta(모멘텀), ATR 포지션 사이징. 주식에 없는 것: 히스토리컬 ★ tracker 저장, 흰 배경 분석카드. 교차비교표 양쪽 HTML에 추가(섹션 14/18). |
 | 2026-06-28 | MJcoin 명령어 | /coin scan → /coin all 리네임. "all"이 전체 스캔 의미로 더 직관적. 기존 scan도 호환 유지(sub in 조건). HELP_TEXT + 사용설명서 HTML도 함께 교체해야 일관성 유지. |
 | 2026-06-28 | MJcoin 텔레그램 콜백 | callback_coin 핸들러 미등록이 /coin 명령 전체 무응답의 단일 원인. 신규 봇 모듈 추가 시 hermes_stock_bot.py CallbackQueryHandler 등록까지 세트로 확인. |
 | 2026-06-28 | MJcoin 보조지표 | 검색기 prep_fn은 자기 검색기 지표만 계산. 차트 핸들러에서 여러 검색기 결과 합산하면 지표 누락 → "—". 차트 핸들러는 항상 직접 계산. |
@@ -748,7 +752,7 @@ gemma4 launchctl unload ~/Library/LaunchAgents/com.bluesea.llama_server2.plist
 - ⚠️ `meta_updater.py` 비활성화 상태 유지 중 (필요시 재활성화)
 
 
-|*최종 업데이트: 2026-06-28 21:20*
+|*최종 업데이트: 2026-06-28 23:02*
 
 ---
 

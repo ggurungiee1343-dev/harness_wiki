@@ -10,7 +10,7 @@ tags: []
 
 # 📝 프로젝트 핫토픽
 
-**최종 업데이트: 2026-06-29 17:21*
+**최종 업데이트: 2026-06-29 19:49*
 
 ## 📠 실시간 상태 (KV — /status 명령어로 설정)
 - **Active External Project**: `/Users/bluesea/Applications/Mjstock` (자동 스캔 시스템 구축 완료)
@@ -35,6 +35,7 @@ tags: []
 | 2026-06-29 | MJstock selyeok 성능 | yfinance 루프 내 개별 호출(500종목×1~3초=1500초) vs group_by="ticker" 배치(1회 10~30초). 검색기 루프에 API 호출 넣기 전 배치 여부 먼저 검토. |
 | 2026-06-29 | MJstock 텔레그램 콜백 | `[결과 보기]` 버튼 무응답 = hermes_stock_bot.py 미실행이 단일 원인. mjstock_callback_bot.py는 send-only(설계 의도) — 콜백 수신 역할 아님. 혼동 금지. |
 | 2026-06-29 | MJstock 콜백 봇 구조 | 버튼 발송 토큰과 콜백 수신 봇 토큰이 같아야(8740948695) Telegram이 콜백 라우팅. 봇 토큰 다르면 콜백 영구 미수신. |
+| 2026-06-29 | MJstock gateway 우회 | gateway 설치 패키지(`venu/venv/lib/.../gateway/platforms/telegram.py`) 수정 불가 — 자체 prefix(mp:/ea:/sc:/cl:)만 처리. `mjstock_results__` prefix 핸들러 없으므로 버튼 콜백 방식 자체가 구조적 불가. 버튼 제거 → HTML `sendDocument` 직접 전송이 유일한 해법. |
 | 2026-06-28 | MJcoin signal_tracker_coin 고도화 | score_delta는 직전 스캔 기록 없으면 항상 0 — 첫 실행 정상. ATR 포지션 사이징: stop=ATR×3, 계좌 1% 리스크 기준. star_type/circle_type은 BUY_SIGNALS 리스트 기반 자동 추출 — 리스트 누락 시 빈 칸. |
 | 2026-06-28 | MJstock chart.py 분석카드 | `_inject_analysis_card()`는 save 함수 끝에서 HTML에 카드 삽입. 세 save 함수(save_chart/save_farming_chart/save_chowuryang_chart) 모두에 추가해야 일관성 유지. 하나라도 누락 시 해당 검색기 차트에만 카드 미표시. |
 | 2026-06-28 | MJcoin signal_tracker | 코인 tracker CSV는 `Coin/tracker/signal_log.csv`. `batch_fill_returns_coin.py`가 루트만 탐색하는 버그 → `_collect_csv_files()` 재귀 탐색으로 수정. 서브폴더 samdoli/uryangju 등 모두 커버. |
@@ -757,7 +758,7 @@ gemma4 launchctl unload ~/Library/LaunchAgents/com.bluesea.llama_server2.plist
 - ⚠️ `meta_updater.py` 비활성화 상태 유지 중 (필요시 재활성화)
 
 
-|*최종 업데이트: 2026-06-29 17:21*
+|*최종 업데이트: 2026-06-29 19:49*
 
 ---
 

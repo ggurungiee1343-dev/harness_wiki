@@ -10,7 +10,7 @@ tags: []
 
 # 📝 프로젝트 핫토픽
 
-**최종 업데이트: 2026-06-30 12:51*
+**최종 업데이트: 2026-06-30 19:13*
 
 ## 📠 실시간 상태 (KV — /status 명령어로 설정)
 - **Active External Project**: `/Users/bluesea/Applications/Mjstock` (자동 스캔 시스템 구축 완료)
@@ -31,6 +31,9 @@ tags: []
 
 | 날짜 | 분야 | 교훈 |
 |---|---|---|
+| 2026-06-30 | Streamlit 블로킹 | `while proc.poll() is None: time.sleep(1)` 패턴은 Streamlit 전체를 블로킹 → 스캔 중 탭 전환 불가. `session_state` 기반 polling + `st.rerun()` 패턴으로 교체해야 첫 번째 검색기 완료 직후 차트탭 접근 가능. Streamlit에서 서브프로세스 대기는 항상 비동기 방식. |
+| 2026-06-30 | Telegram InlineKeyboard | REST API에서 `reply_markup`을 JSON으로 전달. `mjstock_scan_list:{key}:{ts}` 형식 callback_data로 스캔 결과 → 종목 목록 → 차트 → Back 드릴다운 UX 구현 가능. 버튼 레이블은 `{검색기명}(N종)` 형식이 모바일 가독성 최적. |
+| 2026-06-30 | mjstock 콜백 라우팅 | `mjstock_scan_list:` prefix는 `^mjstock[_:]` 패턴에 매칭 → `callback_mjstock()` 자동 라우팅. 신규 `mjstock_*` prefix 추가 시 별도 핸들러 등록 불필요, `callback_mjstock()` 내부 분기만 추가. `mjstock_chart:` 4-part 파싱(ticker/screener_key/date_str)도 동일 라우터에서 처리. |
 | 2026-06-30 | macOS 스케줄러 | macOS에서 crontab은 Full Disk Access 제한으로 Claude Code 셸에서 타임아웃 발생 → launchd plist가 macOS 표준 스케줄러 대안. `~/Library/LaunchAgents/` 에 plist 작성 후 `launchctl load` 로 등록. 신규 배치 스크립트 스케줄링은 crontab 대신 launchd plist 사용. |
 | 2026-06-30 | Streamlit 차트 인라인 표시 | 차트 외부 열기(`subprocess.Popen(["open", chart_path])`)는 Streamlit UI 내부에 표시되지 않음. `st.components.v1.html(f.read(), height=1200, scrolling=True)` 패턴이 인라인 표시 정답. 외부 앱 열기 방식은 Streamlit 웹 UI에서 사용자 경험 단절 발생. |
 | 2026-06-30 | Python SyntaxError 전파 | `signal_tracker.py` `record_scan()`에 `sector_map` 파라미터가 중복 정의되어 SyntaxError → 모듈 import 자체 실패 → 해당 모듈을 쓰는 모든 스캔 결과 전송 불가. 함수 파라미터 추가 후 단독 import 테스트 필수: `python3 -c "import 모듈명"`. 06번 SCAN-006 참조. |
@@ -113,6 +116,11 @@ tags: []
 ---
 
 ## 📌 현재 진행 중인 작업
+
+### ✅ 완료 — MJstock + Coin 텔레그램 봇 UX 개선 (2026-06-30)
+- `handlers/_stock_coin.py`: `/coin all` 버튼 레이블 `검색(N종)` 형식으로 변경 (cmd_coin, _handle_coin_scan_back 2곳)
+- `Mjstock/app.py`: `send_scan_result_telegram()` 시그니처 확장 + InlineKeyboard 버튼 포함 전송 + 스캔 루프 session_state 비동기 전환 (블로킹 제거)
+- `handlers/_stock_mjstock.py`: `_MJSTOCK_SCREENER_NAMES` 딕셔너리, `_handle_mjstock_scan_list()` 신규, `_handle_mjstock_chart()` date_str 파라미터 추가, `callback_mjstock()` 4-part 파싱 지원
 
 ### ✅ 완료 — MJstock 주식봇 AI 채팅 + quant CSV 저장 + signal_tracker 개선 (2026-06-28)
 - Hermes1 HERMES1_BOT_TOKEN 분리 → getUpdates Conflict 해결
@@ -773,7 +781,7 @@ gemma4 launchctl unload ~/Library/LaunchAgents/com.bluesea.llama_server2.plist
 - ⚠️ `meta_updater.py` 비활성화 상태 유지 중 (필요시 재활성화)
 
 
-|*최종 업데이트: 2026-06-30 12:51*
+|*최종 업데이트: 2026-06-30 19:13*
 
 ---
 

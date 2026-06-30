@@ -10,7 +10,7 @@ tags: []
 
 # 📝 프로젝트 핫토픽
 
-**최종 업데이트: 2026-06-30 23:31*
+**최종 업데이트: 2026-06-30 23:48*
 
 ## 📠 실시간 상태 (KV — /status 명령어로 설정)
 - **Active External Project**: `/Users/bluesea/Applications/Mjstock` (자동 스캔 시스템 구축 완료)
@@ -31,6 +31,9 @@ tags: []
 
 | 날짜 | 분야 | 교훈 |
 |---|---|---|
+| 2026-06-30 | MJstock 텔레그램 | bool_items 필터에 ok/pass 제외 필수 — top-level 시스템 키가 조건으로 노출됨. 제외 기준 4가지: exp_ prefix / entry_ prefix / ok / pass. 06번 BUG-006 참조. |
+| 2026-06-30 | MJstock 점수 | 목록/상세 점수 계산은 동일 로직 필수 — ticker_analyze.py 정규화(최고점=100)가 목록 100점/상세 67점 불일치 원인. 정규화 제거 + bool 필터 4가지 제외 기준 통일로 해결. 06번 BUG-007 참조. |
+| 2026-06-30 | MJstock 재무 | KR 초우량주 재무는 yfinance cache 필수 (kospi.KS / kosdaq.KQ suffix). 6자리 코드 → cache key는 6자리 유지, yf 호출 시만 .KS/.KQ 부착. fetch_fundamentals.py KR 유니버스 추가 완료. 06번 FUND-001 참조. |
 | 2026-06-30 | scan_single.py 특수 파라미터 분기 | `scan_single.py`의 else 분기는 `ticker=""` 전달 → 재무 캐시 미사용(proxy fallback). 신규 검색기가 ticker/df_5min/df_30min 등 특수 파라미터 요구 시 scan_single.py에 특수 케이스 분기 동시 추가 필수. 06번 BUG-003 참조. |
 | 2026-06-30 | entry_ prefix 조건표 노출 방지 | check 함수 반환 dict에 entry_45day/entry_15day 같은 내부 진입 플래그가 포함되면 조건표에 pass/fail로 노출됨. `bool_items` 필터에 `not k.startswith("entry_")` 추가로 제거. 검색기 결과 dict에 표시 불필요 키 넣을 때 prefix 규칙 명시 필요. 06번 BUG-004 참조. |
 | 2026-06-30 | 신규 검색기 표시명 등록 패턴 | run_scan.py에 검색기 추가 후 `_MJSTOCK_SCREENER_NAMES` 미등록 → raw key 표시. 신규 검색기 추가 = run_scan.py 등록 + _MJSTOCK_SCREENER_NAMES 등록 세트. 06번 BUG-002 참조. |
@@ -792,7 +795,7 @@ gemma4 launchctl unload ~/Library/LaunchAgents/com.bluesea.llama_server2.plist
 - ⚠️ `meta_updater.py` 비활성화 상태 유지 중 (필요시 재활성화)
 
 
-|*최종 업데이트: 2026-06-30 23:31*
+|*최종 업데이트: 2026-06-30 23:48*
 
 ---
 

@@ -10,7 +10,7 @@ tags: []
 
 # 📝 프로젝트 핫토픽
 
-**최종 업데이트: 2026-06-30 11:11*
+**최종 업데이트: 2026-06-30 12:02*
 
 ## 📠 실시간 상태 (KV — /status 명령어로 설정)
 - **Active External Project**: `/Users/bluesea/Applications/Mjstock` (자동 스캔 시스템 구축 완료)
@@ -38,6 +38,9 @@ tags: []
 | 2026-06-30 | handlers SRP 분할 | 대형 핸들러 분할 시 `safe_reply`/`safe_edit`를 각 신규 파일에 로컬 정의해야 순환 import 방지. `_base.py` import 시 handlers 패키지 전체가 로드되므로 분리 파일은 독립성 유지 필수. |
 | 2026-06-30 | _paper.py dispatch 패턴 | 538줄 단일 함수를 9개 `_handle_*` 서브함수 + dispatch dict 라우터로 분리하면 유지보수성 수직 상승. 새 subcmd 추가 시 함수 1개 + dict 1줄만 추가. |
 | 2026-06-30 | 퀀트 DB 수동조회 누락 | `/stock`, `/mjstock` 수동 조회는 signal_tracker에 저장 안 되고 있었음. 자동 스캔만 저장 중이었으므로 `record_manual_lookup()` 신설 필수. 신규 텔레그램 명령어 구현 시 퀀트 DB 저장 여부 항상 체크. |
+| 2026-06-30 | Streamlit 차트 높이 제한 패턴 | `height=720` 고정이면 차트 아래 매수/매도 분석 섹션이 잘림. 차트 + 분석 섹션을 함께 보여줄 때는 `height=1200` + `scrolling=True` 세트로 설정. 높이 부족은 사용자가 내용 짤림으로 인지 → 리포트 안 올라옴 → 나중에야 발견 패턴. |
+| 2026-06-30 | 배치 채우기 스크립트 crontab 미등록 재발 패턴 | 스크립트 작성 완료 후 crontab 등록을 잊는 패턴 반복. `batch_fill_returns_coin.py` 작성 완료했으나 crontab 미등록. 신규 배치 스크립트 완성 시 반드시 즉시 crontab 등록 확인. (`crontab -l | grep <파일명>` 으로 검증) |
+| 2026-06-30 | 코인 수익률 데이터 축적 특성 | 3d/7d 수익률 채움은 신호 발생 후 3일/7일이 실제로 경과해야 의미있는 데이터 생성. 스크립트 실행 즉시 결과가 안 보이는 것이 정상. 데이터 축적 단계에서는 "비어있는 수익률 컬럼" = 아직 경과 안 됨을 의미. 채움 실패와 혼동 금지. |
 | 2026-06-30 | MJstock 텔레그램 버튼 | BUG-4에서 버튼→sendDocument로 전환했지만 hermes_stock_bot.py에 `callback_mjstock_results` 핸들러가 등록되어 있으면 버튼 방식이 정상 작동함. gateway 경유 여부가 핵심 — gateway 우회 봇(hermes_stock_bot.py)은 자체 prefix 제한 없음. 버튼 방식 가능 여부는 콜백 핸들러 등록 여부로 판단. |
 | 2026-06-30 | MJstock 전송 방식 설계 | 인라인 버튼(요약 메시지 + 버튼) vs sendDocument(HTML 직접 첨부) 선택 기준: 다수 파일 → 버튼(파일폭탄 방지). 단일 결과 → sendDocument도 무방. 2열 버튼 배치(InlineKeyboardButton 2개씩 row)가 모바일 UX 최적. |
 | 2026-06-29 | MJstock 아침 스캔 | subprocess TimeoutExpired를 run_screener() 레벨에서 catch 안 하면 main() 전체 종료 → 이후 검색기 전부 미실행. catch 필수. |
@@ -767,7 +770,7 @@ gemma4 launchctl unload ~/Library/LaunchAgents/com.bluesea.llama_server2.plist
 - ⚠️ `meta_updater.py` 비활성화 상태 유지 중 (필요시 재활성화)
 
 
-|*최종 업데이트: 2026-06-30 11:11*
+|*최종 업데이트: 2026-06-30 12:02*
 
 ---
 

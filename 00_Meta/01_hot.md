@@ -10,7 +10,7 @@ tags: []
 
 # 📝 프로젝트 핫토픽
 
-**최종 업데이트: 2026-06-30 12:02*
+**최종 업데이트: 2026-06-30 12:51*
 
 ## 📠 실시간 상태 (KV — /status 명령어로 설정)
 - **Active External Project**: `/Users/bluesea/Applications/Mjstock` (자동 스캔 시스템 구축 완료)
@@ -31,6 +31,9 @@ tags: []
 
 | 날짜 | 분야 | 교훈 |
 |---|---|---|
+| 2026-06-30 | macOS 스케줄러 | macOS에서 crontab은 Full Disk Access 제한으로 Claude Code 셸에서 타임아웃 발생 → launchd plist가 macOS 표준 스케줄러 대안. `~/Library/LaunchAgents/` 에 plist 작성 후 `launchctl load` 로 등록. 신규 배치 스크립트 스케줄링은 crontab 대신 launchd plist 사용. |
+| 2026-06-30 | Streamlit 차트 인라인 표시 | 차트 외부 열기(`subprocess.Popen(["open", chart_path])`)는 Streamlit UI 내부에 표시되지 않음. `st.components.v1.html(f.read(), height=1200, scrolling=True)` 패턴이 인라인 표시 정답. 외부 앱 열기 방식은 Streamlit 웹 UI에서 사용자 경험 단절 발생. |
+| 2026-06-30 | Python SyntaxError 전파 | `signal_tracker.py` `record_scan()`에 `sector_map` 파라미터가 중복 정의되어 SyntaxError → 모듈 import 자체 실패 → 해당 모듈을 쓰는 모든 스캔 결과 전송 불가. 함수 파라미터 추가 후 단독 import 테스트 필수: `python3 -c "import 모듈명"`. 06번 SCAN-006 참조. |
 | 2026-06-30 | EMA45 이격도 퀀트 저장 | ema45_dist_pct를 signal_log.csv에 안 넣으면 "몇 % 이격 시 진입했나"를 소급 분석 불가. 삼돌이 핵심 지표(EMA45 돌파)는 퀀트 DB에서 이격도 형태로 반드시 보존. sector도 업종별 승률 분석 필수. 새 검색기 만들 때 핵심 지표는 signal_log.csv 컬럼으로 등록 세트. |
 | 2026-06-30 | app.py 차트탭 자동갱신 패턴 | 탭 재진입 시마다 최신 스캔 결과 auto-detect 하려면 `session_state` mtime 비교 패턴 필수. mtime이 바뀌었을 때만 `chart_sel` 업데이트 → 중복 갱신 방지. 스캔 완료 후 탭 전환 UX에 항상 이 패턴 적용. |
 | 2026-06-30 | 퀀트 DB 아침/장중 중복 억제 버그 | signal_tracker.record_scan()의 "이미 active" 체크가 scan_type 구분 없이 동작 → 아침 후보로 기록된 종목의 장중 실제 타점이 영구 누락됨. scan_type 컬럼 추가 + 중복체크에 scan_type 반영으로 해결. morning/intraday 별개 행 기록됨. |
@@ -770,7 +773,7 @@ gemma4 launchctl unload ~/Library/LaunchAgents/com.bluesea.llama_server2.plist
 - ⚠️ `meta_updater.py` 비활성화 상태 유지 중 (필요시 재활성화)
 
 
-|*최종 업데이트: 2026-06-30 12:02*
+|*최종 업데이트: 2026-06-30 12:51*
 
 ---
 

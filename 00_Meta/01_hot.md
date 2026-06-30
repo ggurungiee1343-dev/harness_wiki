@@ -10,7 +10,7 @@ tags: []
 
 # 📝 프로젝트 핫토픽
 
-**최종 업데이트: 2026-06-30 19:13*
+**최종 업데이트: 2026-06-30 19:38*
 
 ## 📠 실시간 상태 (KV — /status 명령어로 설정)
 - **Active External Project**: `/Users/bluesea/Applications/Mjstock` (자동 스캔 시스템 구축 완료)
@@ -31,6 +31,9 @@ tags: []
 
 | 날짜 | 분야 | 교훈 |
 |---|---|---|
+| 2026-06-30 | 스캔 이중 실행 충돌 | `RC!=0 + stderr 비어있음 + stdout 비어있음` = 조용한 이중 실행 충돌 시그니처. Traceback 없음에 속지 말것. 1차 진단: `pgrep -f auto_scan \| wc -l` (2이상이면 이중 실행). 이전 스캔 완료 전 수동 실행 금지. 06번 SCAN-007 참조. |
+| 2026-06-30 | date_str CSV glob 매칭 | `date_str` 형식 `%Y%m%d`는 여러 타임스탬프 충돌 가능 → `%Y%m%d_%H%M%S` 로 변경해야 특정 스캔 시각의 CSV를 정확히 glob 매칭. 형식 변경 시 텔레그램 콜백 파싱쪽(`_handle_mjstock_scan_list`)도 동일 형식 사용하는지 함께 확인. |
+| 2026-06-30 | 코인 버튼 레이블 UX | Coin 스캔 결과 버튼 레이블 `(N종)` 만으로는 "클릭하면 무슨 일이 생기는지" 불명확. `검색(N종)` 접미로 동작을 명시하는 것이 모바일 UX 기준. 버튼 레이블은 항상 동사/동작 포함 여부 검토. |
 | 2026-06-30 | Streamlit 블로킹 | `while proc.poll() is None: time.sleep(1)` 패턴은 Streamlit 전체를 블로킹 → 스캔 중 탭 전환 불가. `session_state` 기반 polling + `st.rerun()` 패턴으로 교체해야 첫 번째 검색기 완료 직후 차트탭 접근 가능. Streamlit에서 서브프로세스 대기는 항상 비동기 방식. |
 | 2026-06-30 | Telegram InlineKeyboard | REST API에서 `reply_markup`을 JSON으로 전달. `mjstock_scan_list:{key}:{ts}` 형식 callback_data로 스캔 결과 → 종목 목록 → 차트 → Back 드릴다운 UX 구현 가능. 버튼 레이블은 `{검색기명}(N종)` 형식이 모바일 가독성 최적. |
 | 2026-06-30 | mjstock 콜백 라우팅 | `mjstock_scan_list:` prefix는 `^mjstock[_:]` 패턴에 매칭 → `callback_mjstock()` 자동 라우팅. 신규 `mjstock_*` prefix 추가 시 별도 핸들러 등록 불필요, `callback_mjstock()` 내부 분기만 추가. `mjstock_chart:` 4-part 파싱(ticker/screener_key/date_str)도 동일 라우터에서 처리. |
@@ -781,7 +784,7 @@ gemma4 launchctl unload ~/Library/LaunchAgents/com.bluesea.llama_server2.plist
 - ⚠️ `meta_updater.py` 비활성화 상태 유지 중 (필요시 재활성화)
 
 
-|*최종 업데이트: 2026-06-30 19:13*
+|*최종 업데이트: 2026-06-30 19:38*
 
 ---
 

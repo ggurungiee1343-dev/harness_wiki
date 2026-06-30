@@ -10,7 +10,7 @@ tags: []
 
 # 📝 프로젝트 핫토픽
 
-**최종 업데이트: 2026-06-29 19:49*
+**최종 업데이트: 2026-06-30 09:04*
 
 ## 📠 실시간 상태 (KV — /status 명령어로 설정)
 - **Active External Project**: `/Users/bluesea/Applications/Mjstock` (자동 스캔 시스템 구축 완료)
@@ -31,6 +31,8 @@ tags: []
 
 | 날짜 | 분야 | 교훈 |
 |---|---|---|
+| 2026-06-30 | MJstock 텔레그램 버튼 | BUG-4에서 버튼→sendDocument로 전환했지만 hermes_stock_bot.py에 `callback_mjstock_results` 핸들러가 등록되어 있으면 버튼 방식이 정상 작동함. gateway 경유 여부가 핵심 — gateway 우회 봇(hermes_stock_bot.py)은 자체 prefix 제한 없음. 버튼 방식 가능 여부는 콜백 핸들러 등록 여부로 판단. |
+| 2026-06-30 | MJstock 전송 방식 설계 | 인라인 버튼(요약 메시지 + 버튼) vs sendDocument(HTML 직접 첨부) 선택 기준: 다수 파일 → 버튼(파일폭탄 방지). 단일 결과 → sendDocument도 무방. 2열 버튼 배치(InlineKeyboardButton 2개씩 row)가 모바일 UX 최적. |
 | 2026-06-29 | MJstock 아침 스캔 | subprocess TimeoutExpired를 run_screener() 레벨에서 catch 안 하면 main() 전체 종료 → 이후 검색기 전부 미실행. catch 필수. |
 | 2026-06-29 | MJstock selyeok 성능 | yfinance 루프 내 개별 호출(500종목×1~3초=1500초) vs group_by="ticker" 배치(1회 10~30초). 검색기 루프에 API 호출 넣기 전 배치 여부 먼저 검토. |
 | 2026-06-29 | MJstock 텔레그램 콜백 | `[결과 보기]` 버튼 무응답 = hermes_stock_bot.py 미실행이 단일 원인. mjstock_callback_bot.py는 send-only(설계 의도) — 콜백 수신 역할 아님. 혼동 금지. |
@@ -758,7 +760,7 @@ gemma4 launchctl unload ~/Library/LaunchAgents/com.bluesea.llama_server2.plist
 - ⚠️ `meta_updater.py` 비활성화 상태 유지 중 (필요시 재활성화)
 
 
-|*최종 업데이트: 2026-06-29 19:49*
+|*최종 업데이트: 2026-06-30 09:04*
 
 ---
 

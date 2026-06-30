@@ -3,20 +3,20 @@ tags: []
 ---
 # Hermes 구조 진단 리포트
 > 자동 생성 — `/verify_harness` 실행 시마다 현재 상태 덮어씌움
-> 최종 진단: 2026-06-23 21:08 | 점수: **67/100** | 등급: **B**
+> 최종 진단: 2026-06-30 01:33 | 점수: **64/100** | 등급: **B**
 > 이력: 최근 20회 자동 보존 (오래된 항목 자동 삭제)
 
 ---
 
-## 현재 상태 (2026-06-23 21:08)
+## 현재 상태 (2026-06-30 01:33)
 
-**📊 종합 점수: 67/100 — 🟡 B — 보통 (일부 개선 권장)**
+**📊 종합 점수: 64/100 — 🟡 B — 보통 (일부 개선 권장)**
 
 ### 📏 파일 비대화
-- 🔴 _stock.py — 1034줄 (위험: 900+, SRP 분할 권장)
-- 🔴 bio_memory_engine.py — 956줄 (위험: 900+, SRP 분할 권장)
+- 🔴 _stock.py — 1631줄 (위험: 900+, SRP 분할 권장)
+- 🟡 bio_memory_engine.py — 632줄 (경고: 600+)
 - 🟢 stock_mcp_server.py — 473줄 (주의: 300+)
-- 🟢 hermes_local.py — 534줄 (주의: 300+)
+- 🟢 hermes_local.py — 515줄 (주의: 300+)
 - 🟢 web_agent_module.py — 506줄 (주의: 300+)
 
 ### 🔗 모듈 의존성 (SRP)
@@ -24,15 +24,24 @@ tags: []
 - ✅ hermes_local.py — modules import 1개 (정상)
 
 ### 📚 문서 동기화
-- ❌ 02_스크립트 정보.md 파일을 찾을 수 없음
+- 👻 문서에 있지만 파일 없음: `app.py` — 문서 표류!
+- 👻 문서에 있지만 파일 없음: `auto_scan_intraday.py` — 문서 표류!
+- 👻 문서에 있지만 파일 없음: `auto_scan_morning.py` — 문서 표류!
+- 👻 문서에 있지만 파일 없음: `auto_scan_nasdaq500.py` — 문서 표류!
+- 👻 문서에 있지만 파일 없음: `batch_fill_returns.py` — 문서 표류!
+- 📄 미문서화 신규 파일: `hermes_handlers_backup_20260526.py` — 02_스크립트 정보.md 업데이트 필요
+- 📄 미문서화 신규 파일: `stock_indicators.py` — 02_스크립트 정보.md 업데이트 필요
+- 📄 미문서화 신규 파일: `stock_mcp_server.py` — 02_스크립트 정보.md 업데이트 필요
+- 📄 미문서화 신규 파일: `stock_scanner.py` — 02_스크립트 정보.md 업데이트 필요
+- 📄 미문서화 신규 파일: `stock_signal_engine.py` — 02_스크립트 정보.md 업데이트 필요
 
 ### ⚡ 서비스 상태
-- ✅ Hermes1 봇 (com.hermes.bot) — PID 71365 실행중
-- ✅ Hermes2 봇 (ai.hermes2.bot) — PID 917 실행중
-- ✅ Gateway (ai.hermes.gateway) — PID 4147 실행중
+- ✅ Hermes1 봇 (com.hermes.bot) — PID 18639 실행중
+- ❌ Hermes2 봇 (ai.hermes2.bot) — 미실행
+- ✅ Gateway (ai.hermes.gateway) — PID 43104 실행중
 
 ### 🧠 메모리 파일
-- ✅ L1 harness_memory — 5KB (정상)
+- ✅ L1 harness_memory — 1KB (정상)
 - ✅ L2 episodic_memory — 583KB (정상)
 - ✅ L3 semantic_memory — 4KB (정상)
 
@@ -45,6 +54,7 @@ tags: []
 
 | 날짜 | 점수 | 등급 | 주요 이슈 | 서비스 |
 |---|---|---|---|---|
+| 2026-06-30 01:33 | 64/100 | B | 🔴1개 👻5개 📄5개 | 2/3 |
 | 2026-06-23 21:08 | 67/100 | B | 🔴2개 | 3/3 |
 | 2026-06-09 20:51 | 95/100 | S | 📄1개 | 3/3 |
 | 2026-06-09 01:43 | 94/100 | S | 📄1개 | 3/3 |
@@ -60,4 +70,4 @@ tags: []
 *관련: `modules/harness_verifier.py` | 텔레그램: `/verify_harness` | 연관: `02_스크립트 정보.md`*
 
 ---
-*최종 업데이트: 2026-06-23 21:08*
+*최종 업데이트: 2026-06-30 01:33*

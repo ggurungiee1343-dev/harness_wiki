@@ -10,14 +10,14 @@ tags: []
 
 # 📝 프로젝트 핫토픽
 
-**최종 업데이트: 2026-06-30 19:38*
+**최종 업데이트: 2026-06-30 23:31*
 
 ## 📠 실시간 상태 (KV — /status 명령어로 설정)
 - **Active External Project**: `/Users/bluesea/Applications/Mjstock` (자동 스캔 시스템 구축 완료)
 - **Current Model (Telegram)**: GPT OSS 120B (기본, NVIDIA API) / DeepSeek API (폴백) / Qwen2.5-14B 로컬 (선택 가능)
 - **Current Model (WebUI)**: Qwen2.5-14B (로컬) / GPT OSS 120B (NVIDIA) / Minimax M2.7 (NVIDIA) — 3종 멀티모델 통합 완료
-- **Hermes1 PID**: 18639 (2026-06-29 기준)
-- **hermes_stock_bot.py PID**: 36986 (2026-06-29 재활성화 — com.hermes.stockbot)
+- **Hermes1 PID**: 66385 (2026-06-30 기준)
+- **hermes_stock_bot.py PID**: 68065 (2026-06-30 재시작 — com.hermes.stockbot, BOT-002 버그 수정 후)
 - **llama-server**: 종료 가능 (Telegram GPT OSS 120B 모드 + WebUI 비-Qwen 선택 시 영향 없음)
 
 ## 💡 Lessons Learned
@@ -31,6 +31,14 @@ tags: []
 
 | 날짜 | 분야 | 교훈 |
 |---|---|---|
+| 2026-06-30 | scan_single.py 특수 파라미터 분기 | `scan_single.py`의 else 분기는 `ticker=""` 전달 → 재무 캐시 미사용(proxy fallback). 신규 검색기가 ticker/df_5min/df_30min 등 특수 파라미터 요구 시 scan_single.py에 특수 케이스 분기 동시 추가 필수. 06번 BUG-003 참조. |
+| 2026-06-30 | entry_ prefix 조건표 노출 방지 | check 함수 반환 dict에 entry_45day/entry_15day 같은 내부 진입 플래그가 포함되면 조건표에 pass/fail로 노출됨. `bool_items` 필터에 `not k.startswith("entry_")` 추가로 제거. 검색기 결과 dict에 표시 불필요 키 넣을 때 prefix 규칙 명시 필요. 06번 BUG-004 참조. |
+| 2026-06-30 | 신규 검색기 표시명 등록 패턴 | run_scan.py에 검색기 추가 후 `_MJSTOCK_SCREENER_NAMES` 미등록 → raw key 표시. 신규 검색기 추가 = run_scan.py 등록 + _MJSTOCK_SCREENER_NAMES 등록 세트. 06번 BUG-002 참조. |
+| 2026-06-30 | fetch_fundamentals KR 자동갱신 wrapper | plist에서 단일 universe 실행 → 여러 universe 실행 전환 시 `run_fetch_fundamentals.sh` wrapper 패턴 사용. plist는 wrapper만 참조, 내부 로직은 sh에서 관리. |
+| 2026-06-30 | 이중 봇 구조 — stock handler 재시작 | `hermes_local.py`와 `hermes_stock_bot.py`는 독립 프로세스. `_stock_coin.py` 수정 후 `hermes_local.py`만 재시작하면 stock bot은 구버전 계속 실행 → 변경사항 미반영. 진단: `pgrep -f hermes_stock_bot` 기동시각 확인. 수정 적용: `launchctl kickstart -k gui/$(id -u)/com.hermes.stockbot`. 06번 BOT-002 참조. |
+| 2026-06-30 | 재무캐시 미존재 시 proxy fallback 부풀림 | `fundamentals_cache.json` 없으면 초우량주 D/E/F 조건이 EMA 기반 proxy로 동작 → 104개 통과(실제 82개). 초우량주 결과 70개↑ = 재무캐시 부재 1차 의심. 진단: `ls -la data/fundamentals_cache.json`. 수정: `fetch_fundamentals.py --universe russell1000`. 06번 FUND-001 참조. |
+| 2026-06-30 | fetch_fundamentals plist KR 미반영 | plist는 `nasdaq1000`만 실행. KR 유니버스(kospi200/kosdaq150) 추가했으나 plist 미갱신 → 토요일 자동 실행 시 KR 재무 미갱신. KR 재무는 수동 실행 필요. 향후 plist 업데이트 또는 KR 전용 plist 신설 과제. |
+| 2026-06-30 | 코인 콜백 4-part 파싱 | `coin_all:{symbol}` → `coin_all:{symbol}:{ts_key}:{screener_key}` 로 변경. 뒤로가기 연결 위해 ts_key + screener_key 필요. 기존 2-part 파싱 코드가 있으면 split 개수 체크 추가 필수. |
 | 2026-06-30 | 스캔 이중 실행 충돌 | `RC!=0 + stderr 비어있음 + stdout 비어있음` = 조용한 이중 실행 충돌 시그니처. Traceback 없음에 속지 말것. 1차 진단: `pgrep -f auto_scan \| wc -l` (2이상이면 이중 실행). 이전 스캔 완료 전 수동 실행 금지. 06번 SCAN-007 참조. |
 | 2026-06-30 | date_str CSV glob 매칭 | `date_str` 형식 `%Y%m%d`는 여러 타임스탬프 충돌 가능 → `%Y%m%d_%H%M%S` 로 변경해야 특정 스캔 시각의 CSV를 정확히 glob 매칭. 형식 변경 시 텔레그램 콜백 파싱쪽(`_handle_mjstock_scan_list`)도 동일 형식 사용하는지 함께 확인. |
 | 2026-06-30 | 코인 버튼 레이블 UX | Coin 스캔 결과 버튼 레이블 `(N종)` 만으로는 "클릭하면 무슨 일이 생기는지" 불명확. `검색(N종)` 접미로 동작을 명시하는 것이 모바일 UX 기준. 버튼 레이블은 항상 동사/동작 포함 여부 검토. |
@@ -784,7 +792,7 @@ gemma4 launchctl unload ~/Library/LaunchAgents/com.bluesea.llama_server2.plist
 - ⚠️ `meta_updater.py` 비활성화 상태 유지 중 (필요시 재활성화)
 
 
-|*최종 업데이트: 2026-06-30 19:38*
+|*최종 업데이트: 2026-06-30 23:31*
 
 ---
 

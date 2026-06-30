@@ -2,7 +2,7 @@
 tags: []
 ---
 # Hermes Claude Briefing
-생성일시: 2026-06-24 22:13
+생성일시: 2026-06-30 22:35
 버전: Hermes v9.2
 
 ---
@@ -13,31 +13,31 @@ tags: []
 - **01_hot.md** — 세션 시작 시 자동 스캔
 
 ## 🖥️ 현재 시스템 상태
-| `screener/screen_nongsa_danta_kr.py` | 농사단타 KR — 삼돌이 후보 대상, 50억봉◆+3매수신호+OBV 3박자, Phase 7단계 |
-| `screener/screen_nongsa_danta_us.py` | 농사단타 US — US 현지화, 30분봉 미사용(needs_30min=False), $5M봉 기준 |
-
-#### run_scan.py 등록
-
-| 레지스트리 | 추가 항목 |
-|---|---|
-| `KR_SCREENERS` | `samdoli_kr` (needs_30min: True), `nongsa_danta_kr` (needs_30min: True) |
-| `US_SCREENERS` | `samdoli` (needs_30min: True), `nongsa_danta` (needs_30min: False) |
-
-**검증**: `python3 -c "from screen_samdoli_kr...; from screen_nongsa_danta_us...; print('성공')"` → 4개 임포트 성공 확인
-
-#### HTML 문서 정리 (8개 → 5개)
-
-| 변경 | 파일 |
-|---|---|
-| 내용 흡수 후 삭제 | `samdoli_guide.html`, `nongsa_danta_guide.html`, `nongsa_signal_board.html` |
-| 삼돌이/농사단타 섹션 추가 | `MJstock_사용설명서.html` (섹션3 카드, 타이밍표, 파라미터표, 선택가이드) |
-| 삼돌이/농사단타 섹션 추가 | `signals_entry_points.html` (섹션13 Phase 가이드, 타점표) |
-| 삼돌이KR/농사단타KR 수식 추가 | `korean_original_formulas.html` (S9/S10) |
-| 삼돌이US/농사단타US 변환표 추가 | `kr_to_us_conversion.html` (S8/S9) |
+- `/restart_bot` 레이스 컨디션 수정 — OLD 프로세스 먼저 SIGTERM, `sleep 1 && python3`로 NEW 시작 (겹치는 구간 제로)
+- 기존: NEW Popen 먼저 → 2초 sleep → OLD SIGTERM (2초간 두 인스턴스 동시 폴링 → Telegram 409 Conflict → 양쪽 사망)
 
 **에러 진단 포인트**:
-- `nongsa_danta_us` import 시 `prepare_30min` 없음 주의 → `needs_30min: False` 유지
-- 함수명 차이: US 버전은 `prepare_daily_us()`, `prepare_5min_us()` (KR과 달리 `_us` 접미사)
+- 재시작 후 봇 무응답: `ps aux | grep hermes_local` 인스턴스 수 확인 (1개여야 정상)
+
+---
+
+**변경 파일**: `handlers/_vault.py`
+
+**변경 내용**:
+- `/vault graph` 노드 5298 > 5000 오버플로우 → env var + try/except graceful degradation
+
+---
+
+#### 신규 스킬 파일 (3개)
+
+| 파일 | 내용 |
+|---|---|
+| `~/.hermes/skills/grill-me/SKILL.md` | 신규 |
+| `~/.hermes/skills/grilling/SKILL.md` | 신규 |
+| `~/.hermes/skills/diagnosing-bugs/SKILL.md` | 신규 |
+
+**에러 진단 포인트**:
+- 스킬 안전성 검사: `python3 -c "from modules.weakness_miner import get_weakness_miner; print(get_weakness_miner().validate_skill_safety())"`
 
 ## 🚨 미해결 버그/장애
 ## 🔴 결함 #1: Zombie Poller (PTB run_polling 블로킹)
@@ -98,4 +98,4 @@ memory.md (핵심 기억) ← L2: episodic_memory.json ~~— memory.md는 Dreami
 *Claude 새 대화 시작 시 이 파일을 첨부하세요.*
 
 ---
-*최종 업데이트: 2026-06-24 22:13*
+*최종 업데이트: 2026-06-30 22:35*

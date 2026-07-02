@@ -48,7 +48,7 @@ tags: []
 |- 자동화_시스템_사용법 — 🆕 2026-06-10 전면 재작성: **전체 하네스 통합 가이드**. Claude Code 5-Layer OS (L1~L5), Self-Harness 3단계 루프 (WeaknessMiner/ProposalValidator), 훅 3개 상세, 서브에이전트, MCP, Wiki+Scripts Git, 텔레그램 명령어 전체, 데이터 누적 로드맵, 문제 해결 빠른 참조. Self-Correction Loops 아티클 3제안 MJ 시스템 적용 분석 포함.
 |- 주식 프로그램 및 주식 스크립트와 연동계획 — 🆕 2026-06-10: V_FINAL 전략 완전 가이드. 텔레그램 7개 명령어 상세 사용법, MCP 서버 사용법, Webull 연동 워크플로우, 개선 루프, 에러 진단 가이드 포함.
 |- Phase1_Phase2_개선_설명서 — 🆕 2026-06-09: Phase 1(낙관적 응답) + Phase 2(세밀한 메모리) 시스템 개선 상세 설명. 구현 구조, 해결 갭 4개, 시너지 효과, 수치 기대 효과 포함. Phase 3 설계 참조 포인터.
-|- 하네스_업그레이드_로드맵_20260611 — 🆕 2026-06-11: 메타 7종 전수 분석 기반 갭 진단 9건 + P1~P3 우선순위 로드맵. **L3 증류 정지(54항목 미처리)·Markdown 137곳 미escape 진단 확정.** 나아갈 방향 4대 전략 포함.
+|- ~~하네스_업그레이드_로드맵_20260611~~ — 2026-06-11 갭 진단 9건 전부 완료(2026-06-11 실행현황 확인). **2026-07-02 삭제** — 잔여 미해결 서브노트 1건은 `HERMES3_MASTER_DEVELOPMENT_GUIDE.md` "흩어진 미완료 항목 통합" 표로 이관.
 |- skill_auditor — 🆕 2026-06-11: Runtime Skill Auditor. ~/.hermes/skills/ 전체 동적 감사. 위험 패턴 10종(시스템명령/외부HTTP/동적실행/역직렬화 등) 탐지. 3단계 위험도(CLEAN/REVIEW/SUSPICIOUS). 로그: skill_audit.log.
 |- test_layer_harness — 🆕 2026-06-11: Layer-Isolated Evaluation Harness. LLM 없이 19개 결정론적 테스트, 1.31초. 4개 레이어(메모리정제/에이전틱루프/파일무결성/핸들러) 독립 검증.
 |- HANDOFF — 🆕 2026-06-11: Architect Loop 상태 파일. Claude Code(Architect)↔DeepSeek(Builder) 핸드오프. 슬라이스 스펙·빌드 결과·미결 이견·결정 로그 포함. 작업마다 Builder가 업데이트, Architect가 판결.
@@ -104,7 +104,7 @@ tags: []
 - 02_스크립트 정보
 - 05_시스템 상태
 
-|*최종 업데이트: 2026-06-28 10:36*
+|*최종 업데이트: 2026-07-02 15:06*
 *추가: 2026-06-06 13:10 — switch_model.sh (모델 전환 스크립트) 참조 추가*
 *추가: 2026-06-05 — AI Agent Memory 개념 분석 참조 항목 추가*
 *작성자: 헤르메스 시스템 아키텍트*
@@ -115,7 +115,7 @@ tags: []
 |---|---|
 | `하네스_논문_기반_개선_로그.md` | 논문 11편 기반 하네스 개선 전체 기록 (Why/What/How + 미적용 후속 항목) |
 
-*최종 업데이트: 2026-06-28 10:36*
+*최종 업데이트: 2026-07-02 15:06*
 
 ## 신규 기능 — 2026-06-21
 
@@ -124,7 +124,7 @@ tags: []
 | `modules/wiki_manager.py` | `write_wiki()` · `lint_wiki()` 메서드 2개 추가 — Karpathy LLM-Wiki 패턴 적용 |
 | `handlers/_meta.py` | `/save_wiki` · `/wiki_lint` 핸들러 2개 추가 (`/claude_brief` 기존 유지) |
 
-*최종 업데이트: 2026-06-28 10:36*
+*최종 업데이트: 2026-07-02 15:06*
 
 ## 신규 문서 — 2026-06-28 (MJstock/MJcoin)
 
@@ -134,4 +134,4 @@ tags: []
 | `~/Applications/Mjstock/docs/quant_logic_analysis.html` | v1.1→v1.2 업데이트 — KIS 100봉 한계 원인·조치 전체 기록 (US/KR 모두) |
 | `~/Applications/Mjstock/Coin/` | 코인 스크리너 폴더 신설 (bithumb_api/data_loader/screen_samdoli/auto_scan/config) |
 
-*최종 업데이트: 2026-06-28 10:36*
+*최종 업데이트: 2026-07-02 15:06*

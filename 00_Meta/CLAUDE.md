@@ -179,6 +179,13 @@ pgrep -f "Scripts/hermes_local.py" | wc -l          # 1이어야 정상(이중 �
 - WebUI 하단 모델 버튼(Hermes2)과 텔레그램 LLM 모드(`llm_mode.txt`)는 **완전 별개**
 - 상세 구조: `Claude_Code_Hermes_통합_아키텍처.md` 참조
 
+### 모델 중립성·비용 통제 원칙 (2026-07-02 추가)
+> 핵심 판단/기억 로직은 로컬 우선, 무거운 추론만 외부 API. 모델을 갈아 끼워도 하네스 워크플로우가 깨지지 않아야 한다. (Palantir Ontology 철학 참고 — 모델은 교체 가능한 부품, 워크플로우/데이터/제어권이 자산)
+
+- 명령어 라우팅·상태 판단 등 반복적인 결정론적 로직은 로컬 모델/코드 우선, Dreaming 증류·복잡 분석처럼 무거운 추론만 외부 API(NVIDIA/DeepSeek) 사용 — `hybrid_router`의 3중 폴백(NVIDIA→DeepSeek→로컬 llama-server)이 이미 이 원칙의 실행체
+- 토큰 단위 과금은 실제 가치 창출과 무관하다는 전제 — 외부 API 비용 급등·장애 시에도 하네스가 로컬 자원만으로 최소 기능 유지 가능해야 함
+- 모델 교체 시 엔드포인트 생존 확인에 그치지 말고 **표준 워크플로우 회귀 검증**까지 수행 (`Scripts/model_endpoint_check.sh`, 섹션 5 참조)
+
 ---
 
 ## 7. 이 파일 자동 업데이트
@@ -191,4 +198,4 @@ pgrep -f "Scripts/hermes_local.py" | wc -l          # 1이어야 정상(이중 �
 *연관: `claude_briefing.md`, `constitution.local.md`, `guardrails.md`, `USER.md`*
 
 ---
-*최종 업데이트: 2026-06-24 22:42*
+*최종 업데이트: 2026-07-02 14:56*

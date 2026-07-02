@@ -10,7 +10,7 @@ tags: []
 
 # 📝 프로젝트 핫토픽
 
-**최종 업데이트: 2026-07-02 14:52*
+**최종 업데이트: 2026-07-02 15:19*
 
 ## 📠 실시간 상태 (KV — /status 명령어로 설정)
 - **Active External Project**: `/Users/bluesea/Applications/Mjstock` (자동 스캔 시스템 구축 완료)
@@ -31,9 +31,13 @@ tags: []
 
 | 날짜 | 분야 | 교훈 |
 |---|---|---|
+| 2026-07-02 | MJcoin quant.db 통합 | 코인/주식 동일 quant.db 통합 시 `market='coin'` 컬럼으로 구분. BTC 강도 컬럼은 `spy_*` 재사용 — DB 스키마 변경 없이 즉시 적용, `market='coin'` 필터로 조회 시 혼동 없음. 새 자산군 추가 시 별도 DB 신설보다 market 컬럼 구분이 교차분석 쿼리 측면에서 유리. |
+| 2026-07-02 | MJcoin BTC 강도 컬럼 설계 | BTC 강도를 spy_* 컬럼으로 재사용한 이유: ①DB 스키마 변경 없이 즉시 적용 ②`market='coin'` 필터 사용 시 spy_* = BTC 강도임을 맥락으로 파악 가능 ③향후 코인 전용 컬럼 추가 시 마이그레이션 없이 오버라이드 가능. 단점: spy_* 컬럼명이 BTC 의미와 다르므로 쿼리 시 주석 필수. |
 | 2026-07-02 | MJstock ticker NaN | check_fn 반환 dict에 ticker 키가 있는 검색기(samdoli/nongsa_danta)는 run_scan.py 호출 시 반드시 ticker=ticker 전달 필수. 누락 시 details의 빈 ticker("")가 row["ticker"]를 덮어써 CSV NaN 저장. 06번 BUG-008/BUG-009 참조. |
 | 2026-07-02 | MJstock quant.db 설계 | CSV만으로는 검색기 간 교차분석/시계열 쿼리 불가 → SQLite 중앙 DB 도입. UNIQUE(scan_datetime, screener, ticker) 제약으로 중복 삽입 방지. CSV는 휴먼 리더블 백업, DB는 쿼리용 주 저장소로 역할 분리. |
 | 2026-07-02 | MJstock 시장강도 컬럼 | 개별 종목 결과만 보면 시장 환경 파악 불가 → 스캔 시점의 SPY/KOSPI 상태(MA위치·수익률)를 모든 행에 스탬프로 박음. 나중에 "약세장 스캔 결과"와 "강세장 스캔 결과"를 분리 분석 가능. |
+| 2026-07-02 | 하네스 문서 파편화 | "미완료 항목"을 여러 메타 문서에 각자 만들면 어느 게 최신인지 알 수 없게 됨(GitHub Remote가 이미 완료됐는데 다른 문서엔 여전히 미완료로 남아있던 사례). 미완료 항목은 `HERMES3_MASTER_DEVELOPMENT_GUIDE.md` 한 곳(흩어진 미완료 항목 통합 표)으로만 추적하고, 완료된 항목을 담은 로드맵 문서는 완료 확인 즉시 삭제(git 히스토리로 복구 가능). |
+| 2026-07-02 | bash JSON 페이로드 이스케이프 | 변수 보간으로 curl -d JSON을 조립할 때 변수 내용에 큰따옴표가 있으면 payload가 깨져 서버가 빈 응답을 반환 — HTTP 200이라 겉보기엔 정상으로 보임. `bash -n` 문법 체크만으로는 못 잡음, 반드시 실제 실행으로 성공 케이스 확인 필요. 06번 BUG-MODCHK-001 참조. |
 | 2026-06-30 | MJstock 텔레그램 | bool_items 필터에 ok/pass 제외 필수 — top-level 시스템 키가 조건으로 노출됨. 제외 기준 4가지: exp_ prefix / entry_ prefix / ok / pass. 06번 BUG-006 참조. |
 | 2026-06-30 | MJstock 점수 | 목록/상세 점수 계산은 동일 로직 필수 — ticker_analyze.py 정규화(최고점=100)가 목록 100점/상세 67점 불일치 원인. 정규화 제거 + bool 필터 4가지 제외 기준 통일로 해결. 06번 BUG-007 참조. |
 | 2026-06-30 | MJstock 재무 | KR 초우량주 재무는 yfinance cache 필수 (kospi.KS / kosdaq.KQ suffix). 6자리 코드 → cache key는 6자리 유지, yf 호출 시만 .KS/.KQ 부착. fetch_fundamentals.py KR 유니버스 추가 완료. 06번 FUND-001 참조. |
@@ -133,6 +137,14 @@ tags: []
 ---
 
 ## 📌 현재 진행 중인 작업
+
+### ✅ 완료 — 모델 중립성 원칙 등록 + 회귀 스모크 테스트 + 문서 파편화 정리 (2026-07-02)
+- Palantir Ontology 개념(모델보다 통제 레이어가 가치) 분석 → 하네스 적용 범위 검토
+- `CLAUDE.md` 섹션 6에 "모델 중립성·비용 통제 원칙" 추가
+- `model_endpoint_check.sh` v1.1 — 활성 모델 표준 워크플로우 회귀 스모크 테스트 추가 (JSON 이스케이프 버그 발견·수정, 06번 BUG-MODCHK-001)
+- `HERMES3_MASTER_DEVELOPMENT_GUIDE.md`에 "온톨로지 레이어화" v9.4+ 후보 등록(보류) + "흩어진 미완료 항목 통합" 표 신설
+- 삭제: `하네스_업그레이드_로드맵_20260611.md`(9/9 완료 확인), `헤르메스 에이전트 진화 로드맵 및 아키텍처 설계.md`(4개 제안 전부 구현 확인) — 둘 다 git rm으로 wiki 히스토리에 보존
+- 수정: `현재 하네스 전체 구조도.md` stale 미완료 항목(GitHub Remote — 이미 완료) 제거
 
 ### ✅ 완료 — MJstock + Coin 텔레그램 봇 UX 개선 (2026-06-30)
 - `handlers/_stock_coin.py`: `/coin all` 버튼 레이블 `검색(N종)` 형식으로 변경 (cmd_coin, _handle_coin_scan_back 2곳)
@@ -798,7 +810,7 @@ gemma4 launchctl unload ~/Library/LaunchAgents/com.bluesea.llama_server2.plist
 - ⚠️ `meta_updater.py` 비활성화 상태 유지 중 (필요시 재활성화)
 
 
-|*최종 업데이트: 2026-07-02 14:52*
+|*최종 업데이트: 2026-07-02 15:19*
 
 ---
 

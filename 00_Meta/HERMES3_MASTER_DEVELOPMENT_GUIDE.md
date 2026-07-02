@@ -1,7 +1,10 @@
+---
+tags: []
+---
 # 🎖️ HERMES3 마스터 개발설명서
 > **최종 통합 문서** | 시간순 정렬 | 중복 제거 | 상태 명시
 > **작성일**: 2026-06-07
-> **마지막 수정**: 2026-06-07 03:45
+> **마지막 수정**: 2026-07-02 (온톨로지 레이어화 후보 등록 + 흩어진 미완료 항목 통합)
 > **버전**: v9.2 (완료) → v9.4+ (중장기)
 
 ---
@@ -588,6 +591,47 @@ hermes skills tap remove <user/repo> # 제거
 | apple/macos | 9 | 관심 (선별적) |
 | anthropic (cross-cat) | 16 | 관심 (pdf, pptx, docx, mcp-builder)
 
+### 🧪 v9.4+ 후보: 온톨로지 레이어화 (모듈 구조화)
+
+**상태**: 설계 검토 완료 (2026-07-02). **보류 — Lock Stack 컴포넌트 재검토 시점까지.**
+
+**배경**: Palantir(알렉스 카프) 인터뷰 분석 — "LLM 시대 진짜 가치는 모델 자체가 아니라 모델 위에 얹는 통제 레이어(Ontology)"라는 주장을 Hermes 하네스에 대입해본 결과. 현재 `modules/`(57개) + `cove_engine`/`deriver_layer`/`dreamer_layer`가 사실상 이 역할(LLM을 감싸는 애플리케이션 레이어)을 하고 있으나, "객체+관계+권한" 형태로 명시적으로 구조화되어 있지는 않음.
+
+**제안 내용**: 모듈들이 각자 로직을 갖는 현재 구조를, 객체(봇/작업/알림/메모리노드)-관계-권한 스키마로 한 단계 더 구조화. 어떤 LLM(로컬/DeepSeek/NVIDIA)으로 교체해도 동일 워크플로우가 그대로 작동함을 명시적으로 보장하는 게 목표.
+
+**구체화된 구현 방향 (2026-07-02 추가 검토)**: Neo4j/그래프 DB 스택은 기각 — `🚫 중지·보류 결정`에서 이미 확정한 "Advanced RAG/sqlite-vec 보류"(임베딩 강제 → RAM·부팅시간 2.5초 원칙 붕괴), "Multi-Agent Orchestration 보류"(Stateless 철학 충돌) 이유와 정면 충돌. 대신 하네스가 이미 쓰고 있는 SQLite(`weakness.db`/`metrics.db`/`sia_feedback.db`와 동일 계열)에 경량 `objects`/`relations` 테이블만 추가하는 방향이 이 후보의 실질적 착수 형태 — 새 인프라 없이 기존 DB 패턴 재사용. 참고로 "Ontology-Augmented Generation(OAG)"이라는 학술 용어는 `context_assembler.py`/`hybrid_recall()`이 이미 하고 있는 동작(구조화된 컨텍스트를 LLM에 주입)에 이름을 붙인 것뿐 — 신규 구현 없이 개념 참고용으로만 가치.
+
+**기대 이점**:
+| 영역 | 효과 |
+|------|------|
+| 모델 교체 안정성 | 모델 교체 후 워크플로우 회귀 여부를 구조적으로 보장 — 현재는 `model_endpoint_check.sh` 회귀 스모크 테스트로 부분 대응 (2026-07-02 추가) |
+| 신규 모듈 온보딩 | 객체/관계 스키마가 있으면 신규 모듈이 기존 구조에 맞춰 설계되어 파편화 감소 |
+
+**안 한 이유 — 리스크**:
+| 항목 | 리스크 |
+|------|--------|
+| Lock Stack 침범 위험 | `cove_engine.py`/`deriver_layer.py`/`dreamer_layer.py` 3개가 핵심 로직을 쥐고 있어, 이들을 건드리지 않고 구조화하려면 설계가 복잡해짐 |
+| 리팩토링 규모 | 57개 모듈 전수 재구조화는 큰 작업 — 지금 당장 가치 대비 리스크가 큼 |
+
+**도입 조건**: 모델 중립성 원칙(CLAUDE.md 섹션 6)과 회귀 스모크 테스트(`model_endpoint_check.sh`) 운영 경험이 쌓여 실제 "모델 바꾸면 뭐가 깨지더라" 하는 구체적 통증 지점이 드러난 뒤 좁은 범위로 재설계.
+
+**참조**: 2026-07-02 Claude Code 세션 — Palantir Ontology 개념 분석 및 하네스 적용 가능성 검토.
+
+---
+
+### 📋 흩어진 미완료 항목 통합 (2026-07-02 정리)
+
+여러 메타 문서에 흩어져 있던 미완료 항목을 여기로 통합 — 이후 신규 미완료 항목도 이 표에 추가. 상세 배경은 각 출처 문서 참조.
+
+| 항목 | 출처 | 상태 | 설명 |
+|---|---|---|---|
+| 루프-인-루프 스케줄링 | 01_hot.md (Karpathy Loop 매핑) | ❌ 미구현 | `/orchestrate` 병렬 실행은 있으나, 루프가 루프를 감독하는 멀티루프 오케스트레이션(Stage 5 완전판)은 미구현. Mayor 에이전트(토큰예산/정체감지)는 이미 구현 완료 — 이것과는 별개로 남은 조각 |
+| L3 patterns 직접 증가 경로 확인 | `하네스_업그레이드_로드맵_20260611.md` (2026-07-02 삭제, 완료 아카이브) | ❌ 미확인 | `MemoryEngine.dream()`의 L3 커밋은 망각곡선 미달 후보만 전이 — 2026-06-11 실행 시 전이 대상 0건. L3 patterns를 직접 늘리려면 `dreaming_v2.py` 경로(텔레그램 Dreaming 버튼) 별도 확인 필요 |
+| `/harness_report` 월간 대시보드 | `현재 하네스 전체 구조도.md` | ❌ 미구현 | verify_harness 이력 + WeaknessMiner DB + ProposalValidator DB 통합 월간 추이 리포트. 구현 난이도 낮음 |
+| Proposal Validation PreToolUse 자동 연결 | `현재 하네스 전체 구조도.md` | ❌ 미구현 | ProposalValidator 모듈 자체는 완성되었으나 PreToolUse 훅으로 자동 연결은 미확인 |
+
+---
+
 ## ✅ 현재 사용 중인 핵심 파일 (v9.2 기준)
 - `HERMES3_MASTER_DEVELOPMENT_GUIDE.md` (이 문서)
 - `HERMES3_ENCYCLOPEDIA.md` (기능 백과사전)
@@ -619,10 +663,11 @@ hermes skills tap remove <user/repo> # 제거
 ||||| **2026-06-11** | **논문 5편 기반 Hermes 강화 (v9.3.2)**: ① Goal-Autopilot — `agentic_loop.py` `_verify_gate()` 추가, 거짓 완료 보고 구조적 차단 (fabrication 33.7%→0.67% 논문 기준). ② Sycophancy Filter — `memory_refinement.py` 아첨 패턴 L2 저장 차단 (25배 증폭 방지). ③ HORMA 계층 검색 — context_tags 클러스터 기반 hybrid_recall() 효율화. ④ Layer-Isolated Harness — `tests/test_layer_harness.py` 신규, 19개 테스트 1.31초. ⑤ Runtime Skill Audit — `modules/skill_auditor.py` 신규, 10종 위험 패턴. | Claude Code |
 ||||| **2026-06-11** | **Architect Loop 워크플로우 도입**: `HANDOFF.md` 신규 생성. Claude Code(Architect)↔DeepSeek WebUI(Builder) 역할 분리. 슬라이스 스펙·수락기준·범위 밖·빌드 결과·이견·결정 로그 구조화. `harness_agent.py` + `CLAUDE.md` 응답 품질 원칙 4개 추가. `자동화_시스템_사용법.md` §13 신규. | Claude Code |
 ||||| **2026-06-11** | **메모리 중복 감지 개선점 등록 (조건부)**: `memory_refinement.py`에 content 해시 기반 중복 필터 추가 설계 등록. `_promote_to_l2()` 타임스탬프·중요도·연상망은 이미 정상 구현 확인됨. **적용 조건: 결함 #5/#6 재발 시에만 투입** — 현재 over-engineering 판단으로 대기. L4 knowledge.db·Agent Orchestrator는 1인 운영 Hermes 규모에 불필요 결론. | Claude Code |
+| **2026-07-02** | **Palantir Ontology 개념 분석 → 온톨로지 레이어화 후보 등록 + 문서 파편화 정리**: 모델 중립성·비용 통제 원칙 CLAUDE.md 섹션 6에 추가. `model_endpoint_check.sh`에 활성 모델 표준 워크플로우 회귀 스모크 테스트 추가(JSON 이스케이프 버그 발견·수정, 06번 보고서 참조). 여러 문서에 흩어진 미완료 항목을 이 문서로 통합 — `하네스_업그레이드_로드맵_20260611.md`(9/9 완료, 잔여 1건만 이관 후 삭제), `헤르메스 에이전트 진화 로드맵 및 아키텍처 설계.md`(2026-06-03 구식 브레인스토밍, 제안 4개 전부 구현 확인 후 삭제) 정리. `현재 하네스 전체 구조도.md`의 stale 항목(GitHub Remote — 이미 완료) 수정. | Claude Code |
 
 ---
 
 *이 문서는 Hermes3 프로젝트의 현재 상태(v9.2 완료 + Phase 1·2 구현)와 향후 로드맵(v9.4+)을 명확히 보여줍니다. 앞으로도 경량·Stateless 원칙을 유지하며 진행해 나가겠습니다.*
 
 ---
-*최종 업데이트: 2026-06-09 16:00 (Phase 1·2 구현 완료, Phase 3 설계 등록, 해야할 일 현황 업데이트)*
+*최종 업데이트: 2026-07-02 15:18*

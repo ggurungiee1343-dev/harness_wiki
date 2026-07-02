@@ -10,7 +10,7 @@ tags: []
 
 # 📝 프로젝트 핫토픽
 
-**최종 업데이트: 2026-07-02 15:19*
+**최종 업데이트: 2026-07-02 15:28*
 
 ## 📠 실시간 상태 (KV — /status 명령어로 설정)
 - **Active External Project**: `/Users/bluesea/Applications/Mjstock` (자동 스캔 시스템 구축 완료)
@@ -31,6 +31,7 @@ tags: []
 
 | 날짜 | 분야 | 교훈 |
 |---|---|---|
+| 2026-07-02 | quant.db cron 체인 | cron→auto_scan→run_scan→quant.db 체인 완성. 별도 저장 트리거 불필요. 수동 실행도 동일하게 저장됨. 주식 3회/일(07:00·09:10·22:30) + 코인 1회/일(08:00) + 수익률 동기화 17:30 양쪽. |
 | 2026-07-02 | MJcoin quant.db 통합 | 코인/주식 동일 quant.db 통합 시 `market='coin'` 컬럼으로 구분. BTC 강도 컬럼은 `spy_*` 재사용 — DB 스키마 변경 없이 즉시 적용, `market='coin'` 필터로 조회 시 혼동 없음. 새 자산군 추가 시 별도 DB 신설보다 market 컬럼 구분이 교차분석 쿼리 측면에서 유리. |
 | 2026-07-02 | MJcoin BTC 강도 컬럼 설계 | BTC 강도를 spy_* 컬럼으로 재사용한 이유: ①DB 스키마 변경 없이 즉시 적용 ②`market='coin'` 필터 사용 시 spy_* = BTC 강도임을 맥락으로 파악 가능 ③향후 코인 전용 컬럼 추가 시 마이그레이션 없이 오버라이드 가능. 단점: spy_* 컬럼명이 BTC 의미와 다르므로 쿼리 시 주석 필수. |
 | 2026-07-02 | MJstock ticker NaN | check_fn 반환 dict에 ticker 키가 있는 검색기(samdoli/nongsa_danta)는 run_scan.py 호출 시 반드시 ticker=ticker 전달 필수. 누락 시 details의 빈 ticker("")가 row["ticker"]를 덮어써 CSV NaN 저장. 06번 BUG-008/BUG-009 참조. |
@@ -810,7 +811,7 @@ gemma4 launchctl unload ~/Library/LaunchAgents/com.bluesea.llama_server2.plist
 - ⚠️ `meta_updater.py` 비활성화 상태 유지 중 (필요시 재활성화)
 
 
-|*최종 업데이트: 2026-07-02 15:19*
+|*최종 업데이트: 2026-07-02 15:28*
 
 ---
 

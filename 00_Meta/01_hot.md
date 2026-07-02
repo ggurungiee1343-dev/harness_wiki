@@ -10,7 +10,7 @@ tags: []
 
 # 📝 프로젝트 핫토픽
 
-**최종 업데이트: 2026-06-30 23:48*
+**최종 업데이트: 2026-07-02 14:52*
 
 ## 📠 실시간 상태 (KV — /status 명령어로 설정)
 - **Active External Project**: `/Users/bluesea/Applications/Mjstock` (자동 스캔 시스템 구축 완료)
@@ -31,6 +31,9 @@ tags: []
 
 | 날짜 | 분야 | 교훈 |
 |---|---|---|
+| 2026-07-02 | MJstock ticker NaN | check_fn 반환 dict에 ticker 키가 있는 검색기(samdoli/nongsa_danta)는 run_scan.py 호출 시 반드시 ticker=ticker 전달 필수. 누락 시 details의 빈 ticker("")가 row["ticker"]를 덮어써 CSV NaN 저장. 06번 BUG-008/BUG-009 참조. |
+| 2026-07-02 | MJstock quant.db 설계 | CSV만으로는 검색기 간 교차분석/시계열 쿼리 불가 → SQLite 중앙 DB 도입. UNIQUE(scan_datetime, screener, ticker) 제약으로 중복 삽입 방지. CSV는 휴먼 리더블 백업, DB는 쿼리용 주 저장소로 역할 분리. |
+| 2026-07-02 | MJstock 시장강도 컬럼 | 개별 종목 결과만 보면 시장 환경 파악 불가 → 스캔 시점의 SPY/KOSPI 상태(MA위치·수익률)를 모든 행에 스탬프로 박음. 나중에 "약세장 스캔 결과"와 "강세장 스캔 결과"를 분리 분석 가능. |
 | 2026-06-30 | MJstock 텔레그램 | bool_items 필터에 ok/pass 제외 필수 — top-level 시스템 키가 조건으로 노출됨. 제외 기준 4가지: exp_ prefix / entry_ prefix / ok / pass. 06번 BUG-006 참조. |
 | 2026-06-30 | MJstock 점수 | 목록/상세 점수 계산은 동일 로직 필수 — ticker_analyze.py 정규화(최고점=100)가 목록 100점/상세 67점 불일치 원인. 정규화 제거 + bool 필터 4가지 제외 기준 통일로 해결. 06번 BUG-007 참조. |
 | 2026-06-30 | MJstock 재무 | KR 초우량주 재무는 yfinance cache 필수 (kospi.KS / kosdaq.KQ suffix). 6자리 코드 → cache key는 6자리 유지, yf 호출 시만 .KS/.KQ 부착. fetch_fundamentals.py KR 유니버스 추가 완료. 06번 FUND-001 참조. |
@@ -795,7 +798,7 @@ gemma4 launchctl unload ~/Library/LaunchAgents/com.bluesea.llama_server2.plist
 - ⚠️ `meta_updater.py` 비활성화 상태 유지 중 (필요시 재활성화)
 
 
-|*최종 업데이트: 2026-06-30 23:48*
+|*최종 업데이트: 2026-07-02 14:52*
 
 ---
 

@@ -10,7 +10,7 @@ tags: []
 
 # 📝 프로젝트 핫토픽
 
-**최종 업데이트: 2026-07-03 23:43*
+**최종 업데이트: 2026-07-04 01:00 — Lessons Learned 123→98줄 정리 완료*
 
 ## 📠 실시간 상태 (KV — /status 명령어로 설정)
 - **Active External Project**: `/Users/bluesea/Applications/Mjstock` (자동 스캔 시스템 구축 완료)
@@ -31,45 +31,23 @@ tags: []
 
 | 날짜 | 분야 | 교훈 |
 |---|---|---|
-| 2026-07-04 | 텔레그램 콜백 데이터 64바이트 한도 | screener_key+date_str+batch_id 등 여러 식별자를 콜백 데이터에 이어붙일 때 최장 케이스(긴 검색기 키) 바이트 수를 반드시 검증할 것. batch_id를 15자 타임스탬프로 만들었다가 66바이트로 초과해 `Button_data_invalid`(무반응) 발생 — 8자 hex로 축소해 해결. 06번 BUG-MJS-021 참조. |
-| 2026-07-04 | "근사 매칭"으로 그룹/배치 식별 금지 | 시간창(±30분) 근사 매칭으로 "같이 발송된 검색기 집합"을 추측했더니 무관한 검색기까지 섞여 나옴. 정확한 그룹 식별이 필요하면 발송 시점에 명시적 매니페스트 파일(`results/_batch/{batch_id}.json`)로 저장해 참조할 것. 06번 BUG-MJS-020 참조. |
-| 2026-07-04 | 텔레그램 인라인 버튼 왕복경로는 반드시 실제 왕복 테스트 | "검색기 2개 이상 조합+뒤로가기 여러 번+KR종목+에러상황"을 실제 왕복해본 적이 없어서 잠복 버그 6개(BUG-MJS-015~019, BUG-COIN-001)가 한꺼번에 드러남. 코드 수정 후 사용자에게 실클릭 요청 전, 핸들러 함수를 mock(FakeQuery)으로 직접 호출하는 자동 회귀 테스트(`test_mjstock_navigation.py`)를 먼저 통과시킬 것 — "고치고→눌러서확인→또터짐" 반복을 막는 핵심 습관. 06번 BUG-MJS-015~021 참조. |
+| 2026-07-04 | 다단계 산출물은 완료 전 원문 재인용 대조 | "구조도 사진 포함" 요청을 Claude가 "박스+화살표"로 임의 축소 해석해 SVG 목업을 누락하고 완료 보고. 정적 체크리스트는 강제력 없음 — 완료 보고 직전 사용자 원문을 그대로 재인용해 항목 쪼갠 뒤 grep/파일로 실제 대조할 것. CLAUDE.md §4 + Claude 메모리(`feedback_verbatim_requirement_check.md`) 양쪽에 원칙 저장 완료. 05번 2026-07-04 "SVG 목업 누락" 항목 참조. |
 | 2026-07-04 | 봇 프로세스 재시작 직후 즉시 클릭 요청 금지 | 코드 수정은 봇 프로세스(`com.hermes.stockbot`) 재시작 전까진 반영 안 됨. 재시작 직후 Hermes 하네스 초기화(ActionRealization/FTS 인덱싱 등, 몇 초 소요) 중 도착한 클릭은 "Query is too old" 에러로 유실 가능 — 재시작 후 몇 초 대기 후 테스트 요청할 것. |
 | 2026-07-04 | 침묵 실패(silent failure) 근본원인 회고 | 오늘 나온 버그 6개(신호매칭 실패·72%오판정·화면깜빡임·scan_type미태깅·명칭불일치·버그번호충돌) 전부 크래시 없이 조용히 틀렸음 — "에러 없음"을 "제대로 동작함"으로 착각한 게 공통 근본원인. 전부 실제 CSV 몇 줄을 육안으로 열어보거나 실제 화면을 봤을 때만 잡혔음. 새 필드/기능은 "실행됐다"가 아니라 "실제 값이 의미 있게 채워졌다"를 반드시 별도 확인할 것. 05번 "개발 프로세스 근본원인 회고" 참조 — CLAUDE.md 승격 여부 다음 세션 검토 대상. |
-| 2026-07-04 | 사용자 재현 증거를 "혼동"으로 넘겨짚지 말 것 | MJ님이 웹 UI 드롭다운≠본문 불일치를 스크린샷으로 제시했는데도 처음엔 "US/KR 검색기 혼동 아니냐"고 넘겨짚어 반발을 삼. 구체적 재현 증거(스크린샷·로그)가 있으면 사용자 오류 가설보다 코드/파일시스템 직접 확인이 항상 먼저. 06번 BUG-MJS-013 참조. |
-| 2026-07-04 | Streamlit 폴링 rerun 간격과 페이지 무게 | `time.sleep(1); st.rerun()`처럼 짧은 폴링 간격은 페이지가 가벼울 때만 안전 — 20개 디렉토리 glob+대량 위젯 렌더링처럼 무거운 페이지에 1초 폴링을 걸면 화면 깜빡임+위젯/본문 시점 불일치(레이스)가 생김. 06번 BUG-MJS-013 참조. |
-| 2026-07-04 | 저장 스키마의 "출처 구분 필드"는 모든 실행 경로가 채워야 유효 | `scan_type`(morning/intraday/manual) 필드가 문서엔 있었지만 웹 UI 실행 경로가 기본값(morning)에 기대고 있어서 자동 아침스캔과 구분이 안 됨 → 중복 억제 로직에 조용히 흡수되어 오후 재실행이 크래시 없이 무효화됨. 여러 실행 경로가 같은 저장 로직을 공유하면 각 경로가 구분 필드를 명시적으로 채우는지 확인할 것. 06번 BUG-MJS-014 참조. |
-| 2026-07-03 | 완료 보고는 기억이 아니라 조회로 | "메타7종 다 했지?"에 기억으로 "네"라고 답했으면 06번 보고서 누락(BUG-MEMREF-001, 버그 수정인데 논문조사 스토리로만 05번/01_hot에 기록하고 CLAUDE.md 트리거표를 실시간 적용 안 함)을 놓쳤을 것 — grep으로 실제 검증했을 때만 잡힘. 코드 수정 직후 그 자리에서 트리거표(버그수정→06번 등) 체크리스트로 바로 적용할 것. "다 했나?" 질문엔 항상 실제 조회로 답할 것, 기억으로 단정 금지. |
 | 2026-07-03 | MJstock 검색기/신호 역할 분리 | 20개 검색기 전수 조사 결과: 대부분(우량주농사/주도주단기/단타의신/세력포착/매수후바로슈팅 등)은 이미 우상향 중인 종목을 잡는 지속형 필터고, 반전 타이밍 감지는 `signals_farming.py`의 ★신호 레이어가 전담(삼돌이/농사단타 계열만 검색기 자체에 반전 로직 내장). 신규 검색기 설계 시 "이게 지속형인지 반전형인지" 먼저 분류하고 반전 감지는 signals_farming으로 위임할 것. |
-| 2026-07-03 | signal_tracker 종료 판정 함정 | "재스캔에 다시 안 걸리면 끝난 것"처럼 간접 신호로 종료(exited/closed)를 판정하면 실제로는 근거 없는 오판정(72% 오탐)이 될 수 있음. 생애주기 추적은 종료 이벤트를 유한 집합(SELL_CONFIRMED/SELL_FALSE/TRAILING_GIVEBACK/TIMEOUT)으로 미리 정의하고, 그 집합 밖은 무조건 active 유지가 기본값이어야 함. 06번 BUG-MJS-011/BUG-MJS-012 참조. |
-| 2026-07-03 | 신호 컬럼 매칭은 실제 생성 함수 스키마 확인 필수 | `_signal_map`이 "BUY_"로 시작하는 컬럼을 찾도록 짜여 있었지만 실제 신호는 `has_buy_signal`/`buy_signal_type` 컬럼에 저장됨 — 매칭 실패가 크래시 없이 조용히 플레이스홀더("SCAN_PASS")로 채워져 2242건 중 2241건이 장기간 방치됨. 신규 로깅 필드 추가 후엔 반드시 실제 CSV 몇 행을 육안 확인할 것. 06번 BUG-MJS-011 참조. |
 | 2026-07-03 | 종료조건과 이정표는 분리 설계 | +5% 도달을 매도 규칙(익절 기준)이자 동시에 신호 검증 추적의 종료 기준으로 같이 쓰면, 신호가 실제로 얼마나 더 갈 수 있었는지(진짜 잠재력)가 데이터에서 잘려나감. 매도 실행 기준과 추적용 데이터 수집 기준은 별도 필드(예: `reached_5pct_date`는 이정표, `close_reason`은 실제 종료)로 분리해서 기록할 것. |
-| 2026-07-03 | MJstock "스캔 실패" 오진단 함정 | 여러 날에 걸쳐 서로 다른 무관한 티커에서 "delisted"/"unable to open database file" 에러가 반복되면 개별 종목 문제가 아니라 cron ulimit(FD 256개) 고갈 의심할 것. 실제 크래시는 스캔 후반부 CSV 저장 시점(`OSError: Too many open files`)에서 터지는데 로그의 `result.stderr[:400]` 잘림 때문에 안 보임 — 재현하려면 `ulimit -n 256`으로 강제 설정 후 재실행. 06번 BUG-010 참조. |
-| 2026-07-03 | Claude Code 셸의 crontab 쓰기 한계 | 이 세션(샌드박스)에서 crontab 수정은 root 소유 좀비 프로세스로 멈추고 exit 0을 반환해도 실제 반영 안 됨(`crontab -l` 재확인 시 그대로). 몇 번을 재시도해도 동일 — 반드시 MJ님이 Terminal.app에서 직접 실행해야 진짜 적용됨. 06번 BUG-010 참조. |
 | 2026-07-02 | quant.db cron 체인 | cron→auto_scan→run_scan→quant.db 체인 완성. 별도 저장 트리거 불필요. 수동 실행도 동일하게 저장됨. 주식 3회/일(07:00·09:10·22:30) + 코인 1회/일(08:00) + 수익률 동기화 17:30 양쪽. |
 | 2026-07-02 | MJcoin quant.db 통합 | 코인/주식 동일 quant.db 통합 시 `market='coin'` 컬럼으로 구분. BTC 강도 컬럼은 `spy_*` 재사용 — DB 스키마 변경 없이 즉시 적용, `market='coin'` 필터로 조회 시 혼동 없음. 새 자산군 추가 시 별도 DB 신설보다 market 컬럼 구분이 교차분석 쿼리 측면에서 유리. |
 | 2026-07-02 | MJcoin BTC 강도 컬럼 설계 | BTC 강도를 spy_* 컬럼으로 재사용한 이유: ①DB 스키마 변경 없이 즉시 적용 ②`market='coin'` 필터 사용 시 spy_* = BTC 강도임을 맥락으로 파악 가능 ③향후 코인 전용 컬럼 추가 시 마이그레이션 없이 오버라이드 가능. 단점: spy_* 컬럼명이 BTC 의미와 다르므로 쿼리 시 주석 필수. |
-| 2026-07-02 | MJstock ticker NaN | check_fn 반환 dict에 ticker 키가 있는 검색기(samdoli/nongsa_danta)는 run_scan.py 호출 시 반드시 ticker=ticker 전달 필수. 누락 시 details의 빈 ticker("")가 row["ticker"]를 덮어써 CSV NaN 저장. 06번 BUG-008/BUG-009 참조. |
 | 2026-07-02 | MJstock quant.db 설계 | CSV만으로는 검색기 간 교차분석/시계열 쿼리 불가 → SQLite 중앙 DB 도입. UNIQUE(scan_datetime, screener, ticker) 제약으로 중복 삽입 방지. CSV는 휴먼 리더블 백업, DB는 쿼리용 주 저장소로 역할 분리. |
 | 2026-07-02 | MJstock 시장강도 컬럼 | 개별 종목 결과만 보면 시장 환경 파악 불가 → 스캔 시점의 SPY/KOSPI 상태(MA위치·수익률)를 모든 행에 스탬프로 박음. 나중에 "약세장 스캔 결과"와 "강세장 스캔 결과"를 분리 분석 가능. |
 | 2026-07-02 | 하네스 문서 파편화 | "미완료 항목"을 여러 메타 문서에 각자 만들면 어느 게 최신인지 알 수 없게 됨(GitHub Remote가 이미 완료됐는데 다른 문서엔 여전히 미완료로 남아있던 사례). 미완료 항목은 `HERMES3_MASTER_DEVELOPMENT_GUIDE.md` 한 곳(흩어진 미완료 항목 통합 표)으로만 추적하고, 완료된 항목을 담은 로드맵 문서는 완료 확인 즉시 삭제(git 히스토리로 복구 가능). |
-| 2026-07-02 | bash JSON 페이로드 이스케이프 | 변수 보간으로 curl -d JSON을 조립할 때 변수 내용에 큰따옴표가 있으면 payload가 깨져 서버가 빈 응답을 반환 — HTTP 200이라 겉보기엔 정상으로 보임. `bash -n` 문법 체크만으로는 못 잡음, 반드시 실제 실행으로 성공 케이스 확인 필요. 06번 BUG-MODCHK-001 참조. |
-| 2026-07-02 | 텔레그램 토큰 — 봇마다 다른 소스 | `config.py`의 `TELEGRAM_TOKEN`(`HARNESS_BOT_TOKEN`, `Mjauto/.env`)이 "공식 소스"라고 착각하고 고쳤다가도 401 — 실제 라이브 봇(`hermes_local.py:105`)은 `config.py`를 아예 안 쓰고 `os.environ`에서 `HERMES1_BOT_TOKEN`(`~/.hermes/.env`)을 직접 읽음. 2026-06-28 봇별 토큰 분리 작업 이후 `HARNESS_BOT_TOKEN`은 이 봇 기준으론 죽은 변수인데 `config.py`엔 그대로 남아 혼동 유발. **교훈**: "설정 로더 모듈이 있으니 거기서 읽으면 맞겠지"라고 가정하지 말고, 실제 그 봇의 진입점 코드(`hermes_local.py` 등)에서 토큰을 어떻게 얻는지 직접 grep해서 확인할 것 — 봇마다 다른 `.env`/다른 변수명을 쓸 수 있음. 06번 BUG-TGMSG-001 참조. |
 | 2026-07-02 | book-to-skill 자동화 한계 | PDF→구조화 변환 도구가 "API 키 불필요, 로컬 처리"라고 홍보해도, 실제로는 Claude Code 등 LLM 에이전트가 세션 안에서 직접 읽고 합성하는 "Agent Skill" 방식일 수 있음(book-to-skill이 그 케이스) — `scripts/extract.py`는 raw 텍스트 추출만 하고 챕터/프레임워크 구조화는 에이전트 몫이라 완전 무인 launchd 자동화 불가. 도구 도입 전 "핵심 로직이 결정론적 스크립트인지 LLM-in-the-loop인지" 반드시 구분할 것. |
 | 2026-07-02 | arXiv ID 검증 없이 조사 착수 금지 | 스크린샷에 적힌 arXiv ID("2607.01871")가 실제로는 존재하지 않는 논문(404)이었음 — 다이제스트 생성 과정의 오류인지 원인 불명. 논문 기반 개선 작업 착수 전 `arxiv.org/abs/<id>` 응답 코드부터 확인할 것. 다행히 에이전트가 스스로 원논문(코드가 실제 인용 중인 2606.10949)으로 우회 검증해서 조사 자체는 무산되지 않았음 — "이 논문 못 찾겠다"에서 멈추지 말고 "그럼 실제로 참조된 원본이 뭔가"로 한 단계 더 파고드는 게 유용했음. |
 | 2026-07-02 | 사이코팬시 필터 길이 게이트의 함정 | "80자 미만만 차단" 같은 길이 기반 휴리스틱은 공격/실패 유형이 짧은 문구에 국한된다는 암묵적 가정을 깔고 있음 — 실제 논문(2606.10949)이 측정한 위험은 정반대로 "길고 확신에 찬 응답 안에 숨은 오류 동조"였음. 길이 대신 "정정/반박 신호의 유무"로 판단 기준을 바꾸니 실제 실패 유형을 잡음. 휴리스틱 설계 시 "이 필터가 막으려는 실제 사례가 뭐였지"를 원논문에서 재확인할 것 — 초기 구현 당시의 가정이 논문 취지와 어긋나 있을 수 있음. |
-| 2026-06-30 | MJstock 텔레그램 | bool_items 필터에 ok/pass 제외 필수 — top-level 시스템 키가 조건으로 노출됨. 제외 기준 4가지: exp_ prefix / entry_ prefix / ok / pass. 06번 BUG-006 참조. |
-| 2026-06-30 | MJstock 점수 | 목록/상세 점수 계산은 동일 로직 필수 — ticker_analyze.py 정규화(최고점=100)가 목록 100점/상세 67점 불일치 원인. 정규화 제거 + bool 필터 4가지 제외 기준 통일로 해결. 06번 BUG-007 참조. |
-| 2026-06-30 | MJstock 재무 | KR 초우량주 재무는 yfinance cache 필수 (kospi.KS / kosdaq.KQ suffix). 6자리 코드 → cache key는 6자리 유지, yf 호출 시만 .KS/.KQ 부착. fetch_fundamentals.py KR 유니버스 추가 완료. 06번 FUND-001 참조. |
-| 2026-06-30 | scan_single.py 특수 파라미터 분기 | `scan_single.py`의 else 분기는 `ticker=""` 전달 → 재무 캐시 미사용(proxy fallback). 신규 검색기가 ticker/df_5min/df_30min 등 특수 파라미터 요구 시 scan_single.py에 특수 케이스 분기 동시 추가 필수. 06번 BUG-003 참조. |
-| 2026-06-30 | entry_ prefix 조건표 노출 방지 | check 함수 반환 dict에 entry_45day/entry_15day 같은 내부 진입 플래그가 포함되면 조건표에 pass/fail로 노출됨. `bool_items` 필터에 `not k.startswith("entry_")` 추가로 제거. 검색기 결과 dict에 표시 불필요 키 넣을 때 prefix 규칙 명시 필요. 06번 BUG-004 참조. |
-| 2026-06-30 | 신규 검색기 표시명 등록 패턴 | run_scan.py에 검색기 추가 후 `_MJSTOCK_SCREENER_NAMES` 미등록 → raw key 표시. 신규 검색기 추가 = run_scan.py 등록 + _MJSTOCK_SCREENER_NAMES 등록 세트. 06번 BUG-002 참조. |
 | 2026-06-30 | fetch_fundamentals KR 자동갱신 wrapper | plist에서 단일 universe 실행 → 여러 universe 실행 전환 시 `run_fetch_fundamentals.sh` wrapper 패턴 사용. plist는 wrapper만 참조, 내부 로직은 sh에서 관리. |
-| 2026-06-30 | 이중 봇 구조 — stock handler 재시작 | `hermes_local.py`와 `hermes_stock_bot.py`는 독립 프로세스. `_stock_coin.py` 수정 후 `hermes_local.py`만 재시작하면 stock bot은 구버전 계속 실행 → 변경사항 미반영. 진단: `pgrep -f hermes_stock_bot` 기동시각 확인. 수정 적용: `launchctl kickstart -k gui/$(id -u)/com.hermes.stockbot`. 06번 BOT-002 참조. |
-| 2026-06-30 | 재무캐시 미존재 시 proxy fallback 부풀림 | `fundamentals_cache.json` 없으면 초우량주 D/E/F 조건이 EMA 기반 proxy로 동작 → 104개 통과(실제 82개). 초우량주 결과 70개↑ = 재무캐시 부재 1차 의심. 진단: `ls -la data/fundamentals_cache.json`. 수정: `fetch_fundamentals.py --universe russell1000`. 06번 FUND-001 참조. |
 | 2026-06-30 | fetch_fundamentals plist KR 미반영 | plist는 `nasdaq1000`만 실행. KR 유니버스(kospi200/kosdaq150) 추가했으나 plist 미갱신 → 토요일 자동 실행 시 KR 재무 미갱신. KR 재무는 수동 실행 필요. 향후 plist 업데이트 또는 KR 전용 plist 신설 과제. |
 | 2026-06-30 | 코인 콜백 4-part 파싱 | `coin_all:{symbol}` → `coin_all:{symbol}:{ts_key}:{screener_key}` 로 변경. 뒤로가기 연결 위해 ts_key + screener_key 필요. 기존 2-part 파싱 코드가 있으면 split 개수 체크 추가 필수. |
-| 2026-06-30 | 스캔 이중 실행 충돌 | `RC!=0 + stderr 비어있음 + stdout 비어있음` = 조용한 이중 실행 충돌 시그니처. Traceback 없음에 속지 말것. 1차 진단: `pgrep -f auto_scan \| wc -l` (2이상이면 이중 실행). 이전 스캔 완료 전 수동 실행 금지. 06번 SCAN-007 참조. |
 | 2026-06-30 | date_str CSV glob 매칭 | `date_str` 형식 `%Y%m%d`는 여러 타임스탬프 충돌 가능 → `%Y%m%d_%H%M%S` 로 변경해야 특정 스캔 시각의 CSV를 정확히 glob 매칭. 형식 변경 시 텔레그램 콜백 파싱쪽(`_handle_mjstock_scan_list`)도 동일 형식 사용하는지 함께 확인. |
 | 2026-06-30 | 코인 버튼 레이블 UX | Coin 스캔 결과 버튼 레이블 `(N종)` 만으로는 "클릭하면 무슨 일이 생기는지" 불명확. `검색(N종)` 접미로 동작을 명시하는 것이 모바일 UX 기준. 버튼 레이블은 항상 동사/동작 포함 여부 검토. |
 | 2026-06-30 | Streamlit 블로킹 | `while proc.poll() is None: time.sleep(1)` 패턴은 Streamlit 전체를 블로킹 → 스캔 중 탭 전환 불가. `session_state` 기반 polling + `st.rerun()` 패턴으로 교체해야 첫 번째 검색기 완료 직후 차트탭 접근 가능. Streamlit에서 서브프로세스 대기는 항상 비동기 방식. |
@@ -77,7 +55,6 @@ tags: []
 | 2026-06-30 | mjstock 콜백 라우팅 | `mjstock_scan_list:` prefix는 `^mjstock[_:]` 패턴에 매칭 → `callback_mjstock()` 자동 라우팅. 신규 `mjstock_*` prefix 추가 시 별도 핸들러 등록 불필요, `callback_mjstock()` 내부 분기만 추가. `mjstock_chart:` 4-part 파싱(ticker/screener_key/date_str)도 동일 라우터에서 처리. |
 | 2026-06-30 | macOS 스케줄러 | macOS에서 crontab은 Full Disk Access 제한으로 Claude Code 셸에서 타임아웃 발생 → launchd plist가 macOS 표준 스케줄러 대안. `~/Library/LaunchAgents/` 에 plist 작성 후 `launchctl load` 로 등록. 신규 배치 스크립트 스케줄링은 crontab 대신 launchd plist 사용. |
 | 2026-06-30 | Streamlit 차트 인라인 표시 | 차트 외부 열기(`subprocess.Popen(["open", chart_path])`)는 Streamlit UI 내부에 표시되지 않음. `st.components.v1.html(f.read(), height=1200, scrolling=True)` 패턴이 인라인 표시 정답. 외부 앱 열기 방식은 Streamlit 웹 UI에서 사용자 경험 단절 발생. |
-| 2026-06-30 | Python SyntaxError 전파 | `signal_tracker.py` `record_scan()`에 `sector_map` 파라미터가 중복 정의되어 SyntaxError → 모듈 import 자체 실패 → 해당 모듈을 쓰는 모든 스캔 결과 전송 불가. 함수 파라미터 추가 후 단독 import 테스트 필수: `python3 -c "import 모듈명"`. 06번 SCAN-006 참조. |
 | 2026-06-30 | EMA45 이격도 퀀트 저장 | ema45_dist_pct를 signal_log.csv에 안 넣으면 "몇 % 이격 시 진입했나"를 소급 분석 불가. 삼돌이 핵심 지표(EMA45 돌파)는 퀀트 DB에서 이격도 형태로 반드시 보존. sector도 업종별 승률 분석 필수. 새 검색기 만들 때 핵심 지표는 signal_log.csv 컬럼으로 등록 세트. |
 | 2026-06-30 | app.py 차트탭 자동갱신 패턴 | 탭 재진입 시마다 최신 스캔 결과 auto-detect 하려면 `session_state` mtime 비교 패턴 필수. mtime이 바뀌었을 때만 `chart_sel` 업데이트 → 중복 갱신 방지. 스캔 완료 후 탭 전환 UX에 항상 이 패턴 적용. |
 | 2026-06-30 | 퀀트 DB 아침/장중 중복 억제 버그 | signal_tracker.record_scan()의 "이미 active" 체크가 scan_type 구분 없이 동작 → 아침 후보로 기록된 종목의 장중 실제 타점이 영구 누락됨. scan_type 컬럼 추가 + 중복체크에 scan_type 반영으로 해결. morning/intraday 별개 행 기록됨. |
@@ -114,7 +91,6 @@ tags: []
 | 2026-06-28 | signal_tracker | exit_price는 price_map에 없음(탈락 종목이므로) → 마지막 기록된 close_price 사용. price_map 조회 실패를 기본 동작으로 처리하면 안 됨. |
 | 2026-06-28 | JSON 파싱 | signal_tracker가 stdout에 [Tracker] 라인 출력 → json.loads 전 `next((l for l in lines if l.strip().startswith('{')), '')` 패턴 필수. stdout에 로그 섞이는 모든 subprocess 호출에 동일 적용. |
 | 2026-06-28 | Hermes1 토큰 | TELEGRAM_BOT_TOKEN 공유 → Hermes1/Hermes2/screener 모두 같은 토큰으로 getUpdates → Conflict. 봇별 토큰 분리(HERMES1_BOT_TOKEN) 필수. |
-| 2026-06-24 | Hermes1 봇 재시작 (BOT-001) | 봇 "자주 뻑감"의 근본 원인 = **재시작 이중화**. botwatch의 nohup 폴백이 launchd 바깥 유령 프로세스 생성 → KeepAlive가 또 하나 띄움 → 두 봇이 getUpdates Conflict로 상호 사망. 봇 재시작은 **반드시 launchd 경로**(`launchctl enable` → `kickstart -k`)로만. 수동 nohup 금지. 진단: `pgrep -f "Scripts/hermes_local.py" \| wc -l`(=1이어야 정상), `launchctl print gui/$(id -u)/com.hermes.bot \| grep state`. 구버전 `com.bluesea.hermes_local.plist.disabled`(~/hermes/ 경로) 절대 enable 금지. 상세: 06번 BOT-001. |
 | 2026-06-24 | 검증층 | 압축 시 안전 규칙 증발(Governance Decay, arXiv 2606.22528). history_manager compact_and_save + get_history_for_llm 양쪽에 GOVERNANCE_ANCHOR 삽입으로 방어. 압축 후 LLM 컨텍스트 맨 앞에 Lock Stack 4개 항상 살아있어야 함. |
 | 2026-06-24 | 검증층 | 메모리 오염(Memory Contagion, arXiv 2606.23195): 편향 평가가 L2/L3 메모리 통해 누적 전파. bio_memory_engine L2 promote 시 confidence + observation_count + provenance 필드로 불확실 기억(confidence < 0.6) 격리. |
 | 2026-06-24 | 검증층 | 스킬 커버리지 측정은 weakness_miner.get_skill_coverage()로. ~/.hermes/skills + ~/.claude/skills 전체 스캔 → 호출률 반환. /status 명령어에서 미호출 스킬 목록 확인 가능. 스킬 추가 후 반드시 한 번은 실제 호출해야 coverage에 잡힘. |
@@ -886,7 +862,7 @@ gemma4 launchctl unload ~/Library/LaunchAgents/com.bluesea.llama_server2.plist
 - ⚠️ `meta_updater.py` 비활성화 상태 유지 중 (필요시 재활성화)
 
 
-|*최종 업데이트: 2026-07-03 23:43*
+|*최종 업데이트: 2026-07-04 00:58*
 
 ---
 

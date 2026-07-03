@@ -10,7 +10,7 @@ tags: []
 
 # 📝 프로젝트 핫토픽
 
-**최종 업데이트: 2026-07-02 15:28*
+**최종 업데이트: 2026-07-03 17:10*
 
 ## 📠 실시간 상태 (KV — /status 명령어로 설정)
 - **Active External Project**: `/Users/bluesea/Applications/Mjstock` (자동 스캔 시스템 구축 완료)
@@ -31,6 +31,12 @@ tags: []
 
 | 날짜 | 분야 | 교훈 |
 |---|---|---|
+| 2026-07-03 | MJstock 검색기/신호 역할 분리 | 20개 검색기 전수 조사 결과: 대부분(우량주농사/주도주단기/단타의신/세력포착/매수후바로슈팅 등)은 이미 우상향 중인 종목을 잡는 지속형 필터고, 반전 타이밍 감지는 `signals_farming.py`의 ★신호 레이어가 전담(삼돌이/농사단타 계열만 검색기 자체에 반전 로직 내장). 신규 검색기 설계 시 "이게 지속형인지 반전형인지" 먼저 분류하고 반전 감지는 signals_farming으로 위임할 것. |
+| 2026-07-03 | signal_tracker 종료 판정 함정 | "재스캔에 다시 안 걸리면 끝난 것"처럼 간접 신호로 종료(exited/closed)를 판정하면 실제로는 근거 없는 오판정(72% 오탐)이 될 수 있음. 생애주기 추적은 종료 이벤트를 유한 집합(SELL_CONFIRMED/SELL_FALSE/TRAILING_GIVEBACK/TIMEOUT)으로 미리 정의하고, 그 집합 밖은 무조건 active 유지가 기본값이어야 함. 06번 BUG-MJS-008/BUG-MJS-009 참조. |
+| 2026-07-03 | 신호 컬럼 매칭은 실제 생성 함수 스키마 확인 필수 | `_signal_map`이 "BUY_"로 시작하는 컬럼을 찾도록 짜여 있었지만 실제 신호는 `has_buy_signal`/`buy_signal_type` 컬럼에 저장됨 — 매칭 실패가 크래시 없이 조용히 플레이스홀더("SCAN_PASS")로 채워져 2242건 중 2241건이 장기간 방치됨. 신규 로깅 필드 추가 후엔 반드시 실제 CSV 몇 행을 육안 확인할 것. 06번 BUG-MJS-008 참조. |
+| 2026-07-03 | 종료조건과 이정표는 분리 설계 | +5% 도달을 매도 규칙(익절 기준)이자 동시에 신호 검증 추적의 종료 기준으로 같이 쓰면, 신호가 실제로 얼마나 더 갈 수 있었는지(진짜 잠재력)가 데이터에서 잘려나감. 매도 실행 기준과 추적용 데이터 수집 기준은 별도 필드(예: `reached_5pct_date`는 이정표, `close_reason`은 실제 종료)로 분리해서 기록할 것. |
+| 2026-07-03 | MJstock "스캔 실패" 오진단 함정 | 여러 날에 걸쳐 서로 다른 무관한 티커에서 "delisted"/"unable to open database file" 에러가 반복되면 개별 종목 문제가 아니라 cron ulimit(FD 256개) 고갈 의심할 것. 실제 크래시는 스캔 후반부 CSV 저장 시점(`OSError: Too many open files`)에서 터지는데 로그의 `result.stderr[:400]` 잘림 때문에 안 보임 — 재현하려면 `ulimit -n 256`으로 강제 설정 후 재실행. 06번 BUG-010 참조. |
+| 2026-07-03 | Claude Code 셸의 crontab 쓰기 한계 | 이 세션(샌드박스)에서 crontab 수정은 root 소유 좀비 프로세스로 멈추고 exit 0을 반환해도 실제 반영 안 됨(`crontab -l` 재확인 시 그대로). 몇 번을 재시도해도 동일 — 반드시 MJ님이 Terminal.app에서 직접 실행해야 진짜 적용됨. 06번 BUG-010 참조. |
 | 2026-07-02 | quant.db cron 체인 | cron→auto_scan→run_scan→quant.db 체인 완성. 별도 저장 트리거 불필요. 수동 실행도 동일하게 저장됨. 주식 3회/일(07:00·09:10·22:30) + 코인 1회/일(08:00) + 수익률 동기화 17:30 양쪽. |
 | 2026-07-02 | MJcoin quant.db 통합 | 코인/주식 동일 quant.db 통합 시 `market='coin'` 컬럼으로 구분. BTC 강도 컬럼은 `spy_*` 재사용 — DB 스키마 변경 없이 즉시 적용, `market='coin'` 필터로 조회 시 혼동 없음. 새 자산군 추가 시 별도 DB 신설보다 market 컬럼 구분이 교차분석 쿼리 측면에서 유리. |
 | 2026-07-02 | MJcoin BTC 강도 컬럼 설계 | BTC 강도를 spy_* 컬럼으로 재사용한 이유: ①DB 스키마 변경 없이 즉시 적용 ②`market='coin'` 필터 사용 시 spy_* = BTC 강도임을 맥락으로 파악 가능 ③향후 코인 전용 컬럼 추가 시 마이그레이션 없이 오버라이드 가능. 단점: spy_* 컬럼명이 BTC 의미와 다르므로 쿼리 시 주석 필수. |
@@ -39,6 +45,10 @@ tags: []
 | 2026-07-02 | MJstock 시장강도 컬럼 | 개별 종목 결과만 보면 시장 환경 파악 불가 → 스캔 시점의 SPY/KOSPI 상태(MA위치·수익률)를 모든 행에 스탬프로 박음. 나중에 "약세장 스캔 결과"와 "강세장 스캔 결과"를 분리 분석 가능. |
 | 2026-07-02 | 하네스 문서 파편화 | "미완료 항목"을 여러 메타 문서에 각자 만들면 어느 게 최신인지 알 수 없게 됨(GitHub Remote가 이미 완료됐는데 다른 문서엔 여전히 미완료로 남아있던 사례). 미완료 항목은 `HERMES3_MASTER_DEVELOPMENT_GUIDE.md` 한 곳(흩어진 미완료 항목 통합 표)으로만 추적하고, 완료된 항목을 담은 로드맵 문서는 완료 확인 즉시 삭제(git 히스토리로 복구 가능). |
 | 2026-07-02 | bash JSON 페이로드 이스케이프 | 변수 보간으로 curl -d JSON을 조립할 때 변수 내용에 큰따옴표가 있으면 payload가 깨져 서버가 빈 응답을 반환 — HTTP 200이라 겉보기엔 정상으로 보임. `bash -n` 문법 체크만으로는 못 잡음, 반드시 실제 실행으로 성공 케이스 확인 필요. 06번 BUG-MODCHK-001 참조. |
+| 2026-07-02 | 텔레그램 토큰 — 봇마다 다른 소스 | `config.py`의 `TELEGRAM_TOKEN`(`HARNESS_BOT_TOKEN`, `Mjauto/.env`)이 "공식 소스"라고 착각하고 고쳤다가도 401 — 실제 라이브 봇(`hermes_local.py:105`)은 `config.py`를 아예 안 쓰고 `os.environ`에서 `HERMES1_BOT_TOKEN`(`~/.hermes/.env`)을 직접 읽음. 2026-06-28 봇별 토큰 분리 작업 이후 `HARNESS_BOT_TOKEN`은 이 봇 기준으론 죽은 변수인데 `config.py`엔 그대로 남아 혼동 유발. **교훈**: "설정 로더 모듈이 있으니 거기서 읽으면 맞겠지"라고 가정하지 말고, 실제 그 봇의 진입점 코드(`hermes_local.py` 등)에서 토큰을 어떻게 얻는지 직접 grep해서 확인할 것 — 봇마다 다른 `.env`/다른 변수명을 쓸 수 있음. 06번 BUG-TGMSG-001 참조. |
+| 2026-07-02 | book-to-skill 자동화 한계 | PDF→구조화 변환 도구가 "API 키 불필요, 로컬 처리"라고 홍보해도, 실제로는 Claude Code 등 LLM 에이전트가 세션 안에서 직접 읽고 합성하는 "Agent Skill" 방식일 수 있음(book-to-skill이 그 케이스) — `scripts/extract.py`는 raw 텍스트 추출만 하고 챕터/프레임워크 구조화는 에이전트 몫이라 완전 무인 launchd 자동화 불가. 도구 도입 전 "핵심 로직이 결정론적 스크립트인지 LLM-in-the-loop인지" 반드시 구분할 것. |
+| 2026-07-02 | arXiv ID 검증 없이 조사 착수 금지 | 스크린샷에 적힌 arXiv ID("2607.01871")가 실제로는 존재하지 않는 논문(404)이었음 — 다이제스트 생성 과정의 오류인지 원인 불명. 논문 기반 개선 작업 착수 전 `arxiv.org/abs/<id>` 응답 코드부터 확인할 것. 다행히 에이전트가 스스로 원논문(코드가 실제 인용 중인 2606.10949)으로 우회 검증해서 조사 자체는 무산되지 않았음 — "이 논문 못 찾겠다"에서 멈추지 말고 "그럼 실제로 참조된 원본이 뭔가"로 한 단계 더 파고드는 게 유용했음. |
+| 2026-07-02 | 사이코팬시 필터 길이 게이트의 함정 | "80자 미만만 차단" 같은 길이 기반 휴리스틱은 공격/실패 유형이 짧은 문구에 국한된다는 암묵적 가정을 깔고 있음 — 실제 논문(2606.10949)이 측정한 위험은 정반대로 "길고 확신에 찬 응답 안에 숨은 오류 동조"였음. 길이 대신 "정정/반박 신호의 유무"로 판단 기준을 바꾸니 실제 실패 유형을 잡음. 휴리스틱 설계 시 "이 필터가 막으려는 실제 사례가 뭐였지"를 원논문에서 재확인할 것 — 초기 구현 당시의 가정이 논문 취지와 어긋나 있을 수 있음. |
 | 2026-06-30 | MJstock 텔레그램 | bool_items 필터에 ok/pass 제외 필수 — top-level 시스템 키가 조건으로 노출됨. 제외 기준 4가지: exp_ prefix / entry_ prefix / ok / pass. 06번 BUG-006 참조. |
 | 2026-06-30 | MJstock 점수 | 목록/상세 점수 계산은 동일 로직 필수 — ticker_analyze.py 정규화(최고점=100)가 목록 100점/상세 67점 불일치 원인. 정규화 제거 + bool 필터 4가지 제외 기준 통일로 해결. 06번 BUG-007 참조. |
 | 2026-06-30 | MJstock 재무 | KR 초우량주 재무는 yfinance cache 필수 (kospi.KS / kosdaq.KQ suffix). 6자리 코드 → cache key는 6자리 유지, yf 호출 시만 .KS/.KQ 부착. fetch_fundamentals.py KR 유니버스 추가 완료. 06번 FUND-001 참조. |
@@ -138,6 +148,46 @@ tags: []
 ---
 
 ## 📌 현재 진행 중인 작업
+
+### ✅ 완료 — MJstock 시그널 생애주기 추적 시스템 버그 3종 수정 + 종료 조건 재설계 (2026-07-03)
+- MJ님과 20개 검색기(US 10 + KR 10) 전수 조사 — 대부분 지속형 필터, 반전 감지는 `signals_farming.py` ★신호 레이어 전담 구조 확인. 조사 중 `signal_tracker.py`/`signal_log.csv`의 실질 고장 발견
+- **버그 1**(`run_scan.py`): `_signal_map`이 "BUY_"로 시작하는 컬럼을 찾았으나 실제론 `has_buy_signal`/`buy_signal_type` 컬럼 사용 → 신호 매칭 2242건 중 2241건 실패("SCAN_PASS" 플레이스홀더만 기록). 컬럼 직접 참조로 수정
+- **버그 2**(`signal_tracker.py` `record_scan()`): 재스캔 미매칭만으로 근거 없이 "exited" 처리 → 2242건 중 1617건(72%) 오판정. 해당 블록 삭제, 기존 1617건 "active"로 마이그레이션
+- **버그 3**(코드 결함 아님, 재확인): `update_returns()`는 크론에 이미 연결돼 있었으나 데이터 축적 시작이 최근(6/28~)이라 10일 경과 행이 아직 없어 미실행 — 스케줄 문제로 오인했다가 정정
+- **설계 변경**: 고정 10/20/30일 창 → 이벤트 기반 즉시 종료(`update_positions()` 신설). SELL_CONFIRMED(매도신호+3거래일 후 -2%↓)/SELL_FALSE(매도신호+반등재돌파)/TRAILING_GIVEBACK(MFE 대비 -3%p 되돌림, 고점 2%↑ 시만)/TIMEOUT(60거래일). +5% 도달은 종료조건 아닌 이정표(`reached_5pct_date`)로만 기록
+- 문서 3종 갱신: `docs/korean_original_formulas.html`, `docs/quant_logic_analysis.html`(2곳), `docs/signals_entry_points.html`(20종 분류표)
+- 테스트: mock으로 4개 분기 개별 검증 + py_compile 통과. **실 라이브 검증 미실시** — 오늘 17:30 크론이 첫 실행
+- **미결정**: 하락 손절 기준(-10% 등 강제 종료 여부) — 현재 타임아웃(60거래일)까지 보유하는 기본값. MJ님 미정
+- 상세: 05번(변경이력) + 06번 BUG-MJS-008/BUG-MJS-009 참조
+
+### 🔄 초기화 — MJstock `experiments/` 삭제 + 문서 정리 (2026-07-03)
+- MJ님이 다른 세션에서 `experiments/`(백테스트 엔진, 789종목 검증 완료 상태였음) 삭제 지시 → 확인 완료, 본체 영향 없음
+- `MJstock_사용설명서.html` v1.8 상세 섹션 → "초기화됨" 짧은 안내로 교체, `loop_review/README.md` 3번 항목 상태 되돌림
+- **재착수 여부는 MJ님 지시 대기 중**
+
+### ✅ 완료 — 논문 2편 조사 → permission_bridge 증거기반 강등 + memory_refinement 중복 제거 (2026-07-03)
+- AutoMem(arXiv 2607.01224)·Managed Autonomy(arXiv 2607.00334) 백그라운드 조사 — 둘 다 실재 논문 확인
+- `permission_bridge.py`: 도구 반복 거부 시 INTERNAL→EXTERNAL 자동 강등 + 쿨다운 후 자동 복귀 (`_RISK_STATE`, `_record_denial()`) — 실측 검증 완료
+- `memory_refinement.py`: `auto_forget()`/`get_memory_health()`가 각자 재구현하던 Ebbinghaus 공식을 `deriver_layer.ForgettingCurve` 재사용으로 통일(Lock Stack 파일 자체는 미수정, import만) — 실측 검증 완료
+- MJstock 백테스트도 대규모 유니버스(789종목)로 확장 완료 — 상세는 05_시스템 상태.md 참조
+
+### ✅ 완료 — 논문 3편 병렬 조사 → skill_auditor 스코프 수정 + sycophancy 필터 개선 (2026-07-02)
+- arXiv 다이제스트에서 하네스 관련 논문 3편(MemSyco-Bench/Skills Are Not Islands/Adversarial Pragmatics) 백그라운드 에이전트 3개 병렬 조사
+- **MemSyco-Bench(2607.01871)는 가짜 논문**(404, 존재 안 함) — 대신 실제 원논문(2606.10949)으로 재검증해서 진짜 갭 찾음
+- `modules/skill_auditor.py`: `~/.claude/skills/` 스캔 누락 수정(46개 스킬로 확대), "스킬을 만드는 스킬" 위험 패턴 추가, `generated_by` provenance 필드 신규
+- `modules/memory_refinement.py`: sycophancy 필터가 80자 미만 짧은 문구만 잡던 것 → "정정 신호 없이 동의만" 기준으로 전환, 장문 확신-동의 오류도 이제 차단
+- Adversarial Pragmatics(2607.01153)는 실재하나 적용 대상 없음(judge 채점 방법론 논문, Hermes 코드와 무관) — 조치 없음
+- 부수 발견: `skill_auditor.py`의 TOKEN 오탐 패턴 → ✅ 같은 세션에서 직접 수정 완료 (17개→12개 SUSPICIOUS로 감소, 남은 건 실제 위험 신호)
+
+### ✅ 완료 — book-to-skill 설치 + Clippings 책 감지 파이프라인 (2026-07-02)
+- `~/.claude/skills/book-to-skill/` 설치 완료 — Claude Code 세션에서 `/book-to-skill <경로>`로 PDF/책을 구조화된 스킬로 변환. **LLM이 직접 챕터/패턴을 추출하는 구조라 완전 자동화 불가**
+- `Scripts/book_watch.py` + launchd `com.hermes.bookwatch` 신규 — Clippings 폴더에 50쪽↑ PDF 들어오면 텔레그램으로 "지금 `/book-to-skill` 돌리세요" 알림만 발송 (변환 자체는 사람이 트리거)
+- `send_telegram_msg.py` 버그 수정 — `TELEGRAM_BOT_TOKEN`(존재 안 함) → 최종적으로 `HERMES1_BOT_TOKEN`(`~/.hermes/.env`, 라이브 봇과 동일 소스)으로 정정. MJ님 터미널에서 발송 성공 확인 완료 (06번 BUG-TGMSG-001)
+- 테스트: 165쪽 슬라이드덱(하용호 강의)으로 실제 변환 성공 — `~/.claude/skills/ha-yongho-ax-expertise/` 생성, 품질 양호. 단 슬라이드덱은 ToC 자동감지 안 됨(LLM이 원문 직접 읽어서 챕터 구분)
+
+**📌 MJ님이 기억해야 할 것**:
+1. Clippings 폴더에 책/PDF 넣기 → (50쪽 이상이면) 텔레그램 알림 옴 → 알림에 적힌 대로 Claude Code에서 `/book-to-skill "<경로>"` 직접 실행 → 결과는 `~/.claude/skills/<책이름>/`에 저장, 이후 `/책이름`으로 호출
+2. 50쪽 미만 문서는 알림 없이 기존 `/ingest` 텔레그램 명령으로 처리 (변경 없음)
 
 ### ✅ 완료 — 모델 중립성 원칙 등록 + 회귀 스모크 테스트 + 문서 파편화 정리 (2026-07-02)
 - Palantir Ontology 개념(모델보다 통제 레이어가 가치) 분석 → 하네스 적용 범위 검토
@@ -811,7 +861,7 @@ gemma4 launchctl unload ~/Library/LaunchAgents/com.bluesea.llama_server2.plist
 - ⚠️ `meta_updater.py` 비활성화 상태 유지 중 (필요시 재활성화)
 
 
-|*최종 업데이트: 2026-07-02 15:28*
+|*최종 업데이트: 2026-07-03 17:10*
 
 ---
 

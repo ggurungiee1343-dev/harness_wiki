@@ -619,6 +619,32 @@ hermes skills tap remove <user/repo> # 제거
 
 ---
 
+### 🧪 v9.4+ 후보: WeaknessMiner 자동 수정안 제안 (Hill Climbing Loop)
+
+**상태**: 설계 검토 완료 (2026-07-02). **미구현 — 우선순위 검토 후 착수.**
+
+**배경**: LangChain "The Art of Loop Engineering" 블로그(2026-07-02 분석) — 에이전트 시스템을 4단계 루프 스택(Agent Loop → Verification Loop → Event-Driven Loop → Hill Climbing Loop)으로 정의. Hermes를 대입해보면 1~3단계(에이전틱 루프/`_verify_gate()` 검증/launchd 이벤트 트리거)는 이미 잘 갖춰져 있으나, 4단계(프로덕션 트레이스 분석 → 설정/프롬프트 자동 개선 제안, 개선 누적)는 부분적 — Self-Harness 3단계(WeaknessMining → **사람이 수동으로 수정안 작성** → ProposalValidator 검증) 중 가운데 단계가 자동화되어 있지 않음.
+
+**제안 내용**: `weakness_miner.py`가 반복 실패 패턴(3회↑)을 감지해 텔레그램 알림을 보내는 현재 흐름 뒤에, LLM이 해당 패턴을 보고 **수정안 초안(코드 diff 또는 설정 변경 제안문)을 자동 생성**해서 알림에 함께 첨부하는 단계 추가. 사람은 "제안 검토 후 승인/반려"만 하면 되도록 — 자동 적용은 아니고 초안 자동화까지만 (ProposalValidator 검증 게이트는 그대로 유지).
+
+**기대 이점**:
+| 영역 | 효과 |
+|------|------|
+| 수정 착수 시간 단축 | 알림 받고 사람이 원인 분석부터 시작하는 대신, LLM 초안을 검토만 하면 됨 |
+| LangChain 4단계 루프 스택과 정합 | Hill Climbing Loop 개념에 부합 — "개선이 누적되는" 구조 완성 |
+
+**안 한 이유 — 리스크**:
+| 항목 | 리스크 |
+|------|--------|
+| 자동 생성 품질 | LLM이 잘못된 원인 분석/수정안을 내면 오히려 검토 부담 증가(잘못된 확신) — ProposalValidator 게이트가 이를 어느 정도 걸러주지만 완전하진 않음 |
+| SIA와 역할 중복 가능성 | v9.2 SelfImprovingAgent(`sia_engine.py`)의 `suggest_improvements()`가 유사 기능을 이미 일부 커버 — 신규 구현 전에 SIA로 확장 가능한지 먼저 검토 필요 |
+
+**도입 조건**: WeaknessMiner DB에 반복 실패 패턴이 실제로 쌓여 "사람이 매번 수동으로 초안 작성하는 게 병목"이라고 체감되는 시점에 재검토. `sia_engine.suggest_improvements()`와 통합 가능 여부 먼저 확인.
+
+**참조**: 2026-07-02 Claude Code 세션 — LangChain Loop Engineering 블로그 분석 및 하네스 대응.
+
+---
+
 ### 📋 흩어진 미완료 항목 통합 (2026-07-02 정리)
 
 여러 메타 문서에 흩어져 있던 미완료 항목을 여기로 통합 — 이후 신규 미완료 항목도 이 표에 추가. 상세 배경은 각 출처 문서 참조.
@@ -629,6 +655,8 @@ hermes skills tap remove <user/repo> # 제거
 | L3 patterns 직접 증가 경로 확인 | `하네스_업그레이드_로드맵_20260611.md` (2026-07-02 삭제, 완료 아카이브) | ❌ 미확인 | `MemoryEngine.dream()`의 L3 커밋은 망각곡선 미달 후보만 전이 — 2026-06-11 실행 시 전이 대상 0건. L3 patterns를 직접 늘리려면 `dreaming_v2.py` 경로(텔레그램 Dreaming 버튼) 별도 확인 필요 |
 | `/harness_report` 월간 대시보드 | `현재 하네스 전체 구조도.md` | ❌ 미구현 | verify_harness 이력 + WeaknessMiner DB + ProposalValidator DB 통합 월간 추이 리포트. 구현 난이도 낮음 |
 | Proposal Validation PreToolUse 자동 연결 | `현재 하네스 전체 구조도.md` | ❌ 미구현 | ProposalValidator 모듈 자체는 완성되었으나 PreToolUse 훅으로 자동 연결은 미확인 |
+| WeaknessMiner 자동 수정안 제안 (Hill Climbing Loop) | LangChain Loop Engineering 분석 (본 문서 위 섹션) | ❌ 미구현 | Self-Harness 3단계 중 "수정안 작성"이 아직 수동 — SIA `suggest_improvements()`와 통합 검토 후 착수 |
+| 로컬 AI 전환 대비 2계층 컨텍스트 설계 | Mjauto/Mjobsidian 전체 진단(2026-07-04) | ❌ 미착수 (설계 논의 필요) | 종국에는 로컬 AI/DeepSeek API/Claude Code를 번갈아 쓸 계획인데, 현재 세션 시작 필독 구조는 클로드 200K 컨텍스트 전제(01_hot.md+CLAUDE.md 등 수만 토큰)라 로컬 모델(8~32K)에서는 작동 불가. **설계 필요 사항**: ① 세션 시작 시 로드하는 정보를 "정책"(CLAUDE.md류, 거의 불변)과 "상태"(01_hot.md류, 매번 변함)로 어떻게 분리할지 ② 로컬 모델 컨텍스트 창 기준 목표 압축률 ③ 지금 구조를 로컬 전제로 전환하는 구체적 방법. MJ님이 "이건 담에 하자, 기록만 해달라"고 지시(2026-07-04) — 실제 로컬 AI 전환 준비 시점에 착수. |
 
 ---
 
@@ -664,10 +692,12 @@ hermes skills tap remove <user/repo> # 제거
 ||||| **2026-06-11** | **Architect Loop 워크플로우 도입**: `HANDOFF.md` 신규 생성. Claude Code(Architect)↔DeepSeek WebUI(Builder) 역할 분리. 슬라이스 스펙·수락기준·범위 밖·빌드 결과·이견·결정 로그 구조화. `harness_agent.py` + `CLAUDE.md` 응답 품질 원칙 4개 추가. `자동화_시스템_사용법.md` §13 신규. | Claude Code |
 ||||| **2026-06-11** | **메모리 중복 감지 개선점 등록 (조건부)**: `memory_refinement.py`에 content 해시 기반 중복 필터 추가 설계 등록. `_promote_to_l2()` 타임스탬프·중요도·연상망은 이미 정상 구현 확인됨. **적용 조건: 결함 #5/#6 재발 시에만 투입** — 현재 over-engineering 판단으로 대기. L4 knowledge.db·Agent Orchestrator는 1인 운영 Hermes 규모에 불필요 결론. | Claude Code |
 | **2026-07-02** | **Palantir Ontology 개념 분석 → 온톨로지 레이어화 후보 등록 + 문서 파편화 정리**: 모델 중립성·비용 통제 원칙 CLAUDE.md 섹션 6에 추가. `model_endpoint_check.sh`에 활성 모델 표준 워크플로우 회귀 스모크 테스트 추가(JSON 이스케이프 버그 발견·수정, 06번 보고서 참조). 여러 문서에 흩어진 미완료 항목을 이 문서로 통합 — `하네스_업그레이드_로드맵_20260611.md`(9/9 완료, 잔여 1건만 이관 후 삭제), `헤르메스 에이전트 진화 로드맵 및 아키텍처 설계.md`(2026-06-03 구식 브레인스토밍, 제안 4개 전부 구현 확인 후 삭제) 정리. `현재 하네스 전체 구조도.md`의 stale 항목(GitHub Remote — 이미 완료) 수정. | Claude Code |
+| **2026-07-03** | **LangChain "Loop Engineering" 분석 → WeaknessMiner 자동 수정안 제안 후보 등록**: 4단계 루프 스택(Agent/Verification/Event-Driven/Hill Climbing) 대입 결과 Hermes는 1~3단계는 이미 구현, 4단계(Hill Climbing — 실패 패턴 자동 개선 제안)만 부분적(Self-Harness 3단계 중 "수정안 작성"이 수동). v9.4+ 후보로 등록(미구현) — SIA `suggest_improvements()`와 통합 검토 후 착수 조건. | Claude Code |
+| **2026-07-03** | **AutoMem/Managed Autonomy 논문 조사 → 실제 코드 수정 2건**: ① `modules/permission_bridge.py` — 증거 기반 권한 강등 추가(`_RISK_STATE`, 도구 반복 거부 시 INTERNAL→EXTERNAL 임시 강등 + 쿨다운 후 자동 복귀, Managed Autonomy arXiv 2607.00334 대응), 실측 검증 완료. ② `modules/memory_refinement.py` — `auto_forget()`/`get_memory_health()`가 각자 재구현하던 에빙하우스 공식을 `deriver_layer.ForgettingCurve` 재사용으로 통일(Lock Stack 파일 미수정, import만), AutoMem 조사 중 발견한 별개 버그. AutoMem 자체 기법(32B 모델 distillation)은 하네스 규모에 안 맞아 이식 안 함. | Claude Code |
 
 ---
 
 *이 문서는 Hermes3 프로젝트의 현재 상태(v9.2 완료 + Phase 1·2 구현)와 향후 로드맵(v9.4+)을 명확히 보여줍니다. 앞으로도 경량·Stateless 원칙을 유지하며 진행해 나가겠습니다.*
 
 ---
-*최종 업데이트: 2026-07-02 15:18*
+*최종 업데이트: 2026-07-04 11:13*

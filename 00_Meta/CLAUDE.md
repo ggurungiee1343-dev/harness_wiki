@@ -123,9 +123,24 @@ tags: []
 
 **실행 이력**: 2026-07-04 — 123줄 → 98줄로 정리. "06번 BUG-XXX 참조"가 명시된 25개 항목(②, 이미 06번에 전체 기록됨) 삭제. "핸들러 mock으로 왕복경로 자동검증 후 실클릭 요청" 습관은 ①로 판단해 아래 항목으로 승격.
 
-### 코드 수정 후 자동 회귀 검증 우선 원칙 (2026-07-04 승격, 01_hot Lessons Learned에서)
-- 텔레그램 봇 콜백 등 **사용자 상호작용이 걸린 코드**를 수정한 뒤에는, 사용자에게 실클릭/실사용 확인을 요청하기 **전에** 먼저 mock(가짜 query/update 객체)으로 핸들러 함수를 직접 호출해 왕복 경로를 자동 검증할 것
-- "고치고 → 사용자가 눌러서 확인 → 또 터짐"을 반복하는 근본 원인은 이 사전 자동검증 습관 부재. 관련 예시: `Mjauto/Scripts/test_mjstock_navigation.py`
+### 중요/위험 작업 표준 절차 (2026-07-04 확정 — 코드 수정 후 자동 회귀 검증 원칙을 일반화)
+아래 어느 하나라도 해당하면 **반드시 이 순서로만** 진행 (텔레그램 콜백 한정 아님 — 실행 중인 프로덕션 코드·핸들러 리팩터링·다수 파일 동시 수정 등 "잘못되면 조용히 깨지고 사용자가 뒤늦게 발견하는" 모든 작업에 적용):
+
+1. **사전 체크포인트** — 작업 전 git 커밋 상태 확인(되돌릴 지점 확보). 회귀 테스트가 있으면 baseline 통과 상태 먼저 확인
+2. **변경 실행**
+3. **자동 검증 먼저** — 사용자에게 실사용/실클릭 확인을 요청하기 **전에** mock(가짜 query/update 객체 등) 또는 기존 회귀 테스트로 자동 검증. 관련 예시: `Mjauto/Scripts/test_mjstock_navigation.py`
+4. **서비스 재시작이 필요한 경우** — 재시작 후 `pgrep`으로 생존 확인까지 마친 뒤에야 다음 단계로
+5. **그 다음에야** 사용자에게 실사용 확인 요청
+
+**왜**: "고치고 → 사용자가 눌러서 확인 → 또 터짐"을 반복하는 근본 원인은 사전 자동검증 습관 부재. "에러 없음"을 "정상 동작"으로 착각하는 침묵 실패(silent failure) 패턴이 실제로 반복 발생했음(2026-07-04 6건). 핸들러 분할처럼 순환참조·import 체인이 걸린 리팩터링은 특히 위험 — `~/.hermes/skills/devops/single-file-to-package-refactor/SKILL.md` 참조.
+
+### "내 통제 범위는 깨끗함" = 멈출 지점이 아니라 확장할 신호 (2026-07-04 확정, MJ님 지적)
+내 코드·네트워크·설정(통제 범위 안)을 다 뒤졌는데 이상이 없으면, 거기서 **"모르겠다"로 답을 끝내지 말 것** — 그건 원인을 못 찾았다는 뜻이지 원인이 없다는 뜻이 아님. 논리적으로 다음 수순은 통제 범위 **바깥**(외부 공급자·API·서비스 자체)까지 검색을 넓히는 것. MJ님 표현: "통제 범위 안에서 문제가 없으면 쉽게 밖에도 찾아보는 게 논리적이다. 머리도 좋고 인프라도 좋은데 단 하나 검색 안 해서 고민하는 건 웃기다."
+
+- **적용 규칙**: API·토큰·DB 등 **내 것이 아니라 빌려 쓰는 외부 자원**(KIS·텔레그램·NVIDIA·DeepSeek·빗썸 등)이 이상 동작하고 내 쪽 점검이 끝났다면, WebSearch/WebFetch로 공급자 공식 상태 페이지·공지사항을 반드시 검색까지 실행할 것 — "아마 그럴 것"이라고 추정만 하고 멈추지 말 것
+- **과거 비슷한 사례와 패턴이 닮아 보여도 성급히 동일 원인으로 일반화 금지**: KIS API 접속 실패를 지난 텔레그램 SNI 차단과 같은 유형이라 추정하고 내 네트워크만 뒤졌으나, 진짜 원인은 KIS 자체 공지된 전산 점검(완전히 내 바깥, 검색 한 번이면 확인 가능했던 사실)이었음
+- **왜 이게 중요한가**: MJ님은 현장 밖에 있고 이 시스템 전체를 위임한 상태 — "안 된다"에서 멈추면 사용자가 포기하고 싶어짐. 의문이 하나라도 남아있으면 그걸 언급하고 계속 파고드는 태도 자체가 신뢰의 핵심. "모르겠다"보다 "이것까지 확인했고, 다음은 이걸 의심해본다"가 항상 낫다.
+- **소거법 체크리스트**: 내 통제 범위를 완벽히 점검·확인했다는 전제하에, `03_시스템 인벤토리.md`의 "🔌 외부 의존 자원 목록" 표를 위에서부터 하나씩 소거법으로 확인 — 이미 KIS/텔레그램/NVIDIA/DeepSeek/빗썸 등 상태 확인 방법이 정리돼 있음.
 
 ### 커스텀 스킬 (자연어 트리거)
 
@@ -154,15 +169,8 @@ tags: []
 - **Hermes1 봇을 `nohup`/수동 `python hermes_local.py`로 직접 실행 금지** (이중 인스턴스 → getUpdates Conflict → 상호 사망). 재시작은 launchd 경로만
 - **`com.bluesea.hermes_local.plist.disabled` enable 금지** — 구버전(`~/hermes/` 경로). 정식은 `com.hermes.bot`(`Scripts/hermes_local.py`)
 
-### Hermes1 봇 재시작 표준 절차 (2026-06-24 BOT-001 확정)
-봇이 안 뜨거나 "이미 실행 중" 반복 시 — **반드시 이 순서로만**:
-```bash
-launchctl enable gui/$(id -u)/com.hermes.bot       # disabled 드리프트 해제
-launchctl kickstart -k gui/$(id -u)/com.hermes.bot # 정식 재시작
-pgrep -f "Scripts/hermes_local.py" | wc -l          # 1이어야 정상(이중 인스턴스 아님)
-```
-- 진단: `launchctl print gui/$(id -u)/com.hermes.bot | grep state`
-- botwatch(`check_bot_alive.sh`)가 5분마다 자동 복구. `botwatch.log`에 `nohup 직접 실행` 보이면 수정 되돌려진 것 → 06번 BOT-001 참조
+### Hermes 봇 재시작 절차 (2026-07-04부터 스킬로 이전)
+봇이 안 뜨거나 "이미 실행 중" 반복 시, 또는 서비스 상태 점검 시 → **`~/.hermes/skills/devops/hermes-bot-restart/SKILL.md`** 참조(표준 재시작 명령어 + bootstrap 실패 재시도 + botwatch 진단 전부 포함).
 
 ---
 
@@ -170,8 +178,7 @@ pgrep -f "Scripts/hermes_local.py" | wc -l          # 1이어야 정상(이중 �
 
 | 목적 | 사용 스크립트 |
 |---|---|
-| 서비스 상태 점검 | `Scripts/check_services.sh` |
-| Hermes1 봇 재시작 | `launchctl enable gui/$(id -u)/com.hermes.bot && launchctl kickstart -k gui/$(id -u)/com.hermes.bot` |
+| 서비스 상태 점검 / 봇 재시작 | `~/.hermes/skills/devops/hermes-bot-restart/SKILL.md` 스킬 참조 |
 | API 엔드포인트 확인 | `Scripts/model_endpoint_check.sh` |
 | WebUI 캐시 삭제 | `Scripts/clear_webui_cache.sh` |
 | venv 패치 확인 | `Scripts/check_venv_patches.sh` |
@@ -210,4 +217,4 @@ pgrep -f "Scripts/hermes_local.py" | wc -l          # 1이어야 정상(이중 �
 *연관: `claude_briefing.md`, `constitution.local.md`, `guardrails.md`, `USER.md`*
 
 ---
-*최종 업데이트: 2026-07-04 00:01*
+*최종 업데이트: 2026-07-04 14:29*

@@ -4,7 +4,7 @@ tags: []
 # Hermes Harness Skill 모음
 
 > 커스텀 스킬 목록 및 호출 방법 관리 문서  
-> 최종 업데이트: 2026-06-10
+> 최종 업데이트: 2026-07-04 (번호 매김 정정 + 미문서화 Hermes 전용 스킬 13개 추가 등록)
 
 ---
 
@@ -58,7 +58,14 @@ tags: []
 | `00_Meta_지도.md` | 신규 문서 생성 |
 | `claude_briefing.md` | 시스템 구조 대규모 변경 |
 
-### 2. mj-stock-analyze — V_FINAL 주식 분석 체크리스트
+### 2. hermes-bot-restart — Hermes 봇 재시작 표준 절차 + 서비스 점검 (2026-07-04 신규)
+
+**형태**: Hermes 스킬
+**파일**: `~/.hermes/skills/devops/hermes-bot-restart/SKILL.md`
+**트리거**: "봇이 안 떠", "봇 재시작해줘", "서비스 상태 확인해줘"
+**내용**: CLAUDE.md에 있던 봇 재시작 표준 절차(launchd enable+kickstart, bootout+bootstrap 재시도 패턴, BOT-001/BOT-003 금지사항)를 스킬로 이전 — CLAUDE.md 토큰 절약 목적. 원본 CLAUDE.md §4에는 스킬 참조 포인터만 남김.
+
+### 3. mj-stock-analyze — V_FINAL 주식 분석 체크리스트
 
 **형태**: Hermes 스킬 (2026-06-24 ~/.claude/skills/ → ~/.hermes/skills/ 통합 완료)  
 **파일**: `~/.hermes/skills/mj-stock-analyze/SKILL.md`  
@@ -143,7 +150,7 @@ tags: []
 
 ---
 
-### 4. /ship — 병렬 서브에이전트 코드 작성/리뷰/테스트
+### 7. /ship — 병렬 서브에이전트 코드 작성/리뷰/테스트
 
 **형태**: Claude Code 슬래시 커맨드 + 에이전트 팀  
 **파일**: `~/.claude/commands/ship.md` + `~/.claude/agents/{writer,reviewer,tester}.md`  
@@ -240,6 +247,28 @@ tags: []
 > **트리거 등록 우선순위**: ingest → harness_verifier → curator → system_monitor 순으로 정리 추천
 
 ---
+
+## 🔍 미문서화 Hermes/MJ 전용 스킬 발견 및 등록 (2026-07-04)
+
+**배경**: `~/.hermes/skills/`에 실제로는 43개 폴더가 있으나 이 문서엔 10개 미만만 기록돼 있었음. 확인 결과 대부분(apple/creative/mlops/gaming/social-media 등)은 범용 마켓플레이스 번들 스킬(포켓몬 플레이어, 마인크래프트 서버 등 MJ 시스템과 무관)이라 개별 문서화 대상이 아니었음. 다만 아래 스킬들은 **한국어 설명·Hermes/MJ 시스템 직접 참조**가 있어 명백히 커스텀인데 누락돼 있었음 — 등록.
+
+| 스킬 | 경로 | 역할 |
+|---|---|---|
+| `cove_verifier` | `~/.hermes/skills/cove_verifier/SKILL.md` | Chain-of-Verification 폐쇄루프 검증 — 로컬 모델(Gemma4) 응답을 Obsidian Vault·에이전트 메모리와 대조. constitution.local.md의 CoVe Step5와 연동 |
+| `launchd-brew-path-fix` | `~/.hermes/skills/launchd-brew-path-fix/SKILL.md` | `brew upgrade`로 launchd 서비스 바이너리 경로 깨졌을 때 진단→symlink 전환→재등록 전 과정 |
+| `devops/harness-check` | `~/.hermes/skills/devops/harness-check/SKILL.md` | Harness 안전성·컴플라이언스 점검 — 프로세스 상태/락/라우팅/메타문서 타임스탬프/프롬프트 길이 이진 채점 |
+| `devops/macos-maintenance` | `~/.hermes/skills/devops/macos-maintenance/SKILL.md` | Mac Studio 유지보수 통합 절차 — launchd 서비스 관리, 로컬 LLM 전환, 헬스체크, dream scheduler 관리, 정리 |
+| `devops/hermes-jumbo-lite` | `~/.hermes/skills/devops/hermes-jumbo-lite/SKILL.md` | Jumbo CLI 없이 동적 컨텍스트·목표·가드레일 관리를 제공하는 경량 스킬 |
+| `devops/kanban-orchestrator` | `~/.hermes/skills/devops/kanban-orchestrator/SKILL.md` | Hermes Kanban 오케스트레이터 역할 플레이북("직접 작업하지 말 것" 규칙 등) |
+| `devops/kanban-worker` | `~/.hermes/skills/devops/kanban-worker/SKILL.md` | Hermes Kanban 워커 함정·예제·엣지케이스 상세 |
+| `devops/reduce-bugfix-patterns` | `~/.hermes/skills/devops/reduce-bugfix-patterns/SKILL.md` | `/reduce` 명령어 버그 수정 패턴 모음 |
+| `devops/single-file-to-package-refactor` | `~/.hermes/skills/devops/single-file-to-package-refactor/SKILL.md` | 대형 단일 Python 파일 → 기능별 서브모듈 패키지 분리(순환참조 방지 lazy import 포함) — **`_stock_mjstock.py` 등 대형 핸들러 분할 작업 시 이 스킬 먼저 참조할 것** |
+| `software-development/hermes-bot-code-management` | `~/.hermes/skills/software-development/hermes-bot-code-management/SKILL.md` | Hermes 봇 코드 관리 절차 |
+| `software-development/dreaming-fix` | `~/.hermes/skills/software-development/dreaming-fix/SKILL.md` | Dreaming/ingest/hybrid-router 관련 버그 수정 패턴 |
+| `software-development/telegram-parse-mode-fix` | `~/.hermes/skills/software-development/telegram-parse-mode-fix/SKILL.md` | 텔레그램 "Can't parse entities" 에러 — parse_mode(HTML/Markdown/None) 불일치 진단·수정 |
+| `software-development/hermes-agent-skill-authoring` | `~/.hermes/skills/software-development/hermes-agent-skill-authoring/SKILL.md` | 신규 SKILL.md 작성 가이드(frontmatter·validator·구조) — **다음에 스킬 만들 때 이 스킬부터 참조** |
+
+> **미해결**: 나머지 30여 개 폴더(academic-paper, research, note-taking, productivity 등)는 범용/생성형 마켓플레이스 스킬로 추정되나 전수 검증은 안 함. 필요시 개별 확인 후 이 표에 추가.
 
 ---
 
@@ -451,4 +480,4 @@ result = ve.verify_db_row_exists("~/.hermes/runtime/weakness.db", "failure_log",
 | **다른 AI (ChatGPT 등)** | ❌ 불가 | skills/ 폴더 접근 권한 없음 |
 
 ---
-*최종 업데이트: 2026-06-24 22:38*
+*최종 업데이트: 2026-07-04 10:43*

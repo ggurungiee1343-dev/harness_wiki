@@ -45,6 +45,8 @@ tags: []
 
 > **2026-06-23 Lock Stack 변경**: `bio_memory_engine.py` 잠금 해제 — SRP 분할 및 Dreaming 결함 #5 수정 완료. 분할 후 신규 파일(`vector_engine.py`)은 리팩토링 완료 시까지 잠금 불필요.
 
+> **2026-07-06 `cove_engine.py` 조건부 해제 지침 (MJ님 확정)**: 현재는 **잠금 유지**. 단 아래 기능을 원하면 그때 해제 권장 — `run_cove_pipeline()`이 `mode`(strict/balanced 검증 깊이)·`history_data`(대화 맥락을 팩트체크에 활용)를 **실제로 쓰도록 개선**하려는 경우. 현재 호출부(`/ask`·`/devil`)는 이 두 인자를 넘겼으나 `run_cove_pipeline`이 안 받아 무시됨(BUG-CORE-022에서 호출부만 임시 정리 — 버그는 해결됐으나 mode/history 기능은 미복원). **해제 전 필수**: `git blame`/주변 코드로 리팩터링이 왜 mode/history_data를 뺐는지 먼저 확인(의도적 단순화면 복원이 그 의도와 충돌). 06번 BUG-CORE-022 참조.
+
 ---
 
 ## 4. Claude Code 행동 원칙
